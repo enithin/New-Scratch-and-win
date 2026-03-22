@@ -145,55 +145,54 @@ window.onload = function() {
 };
 </script>
 <script>
-   // REPLACE your script with this:
-const scriptURL = "const scriptURL = "https://script.google.com/macros/s/AKfycbwSOTrL7n1AFanDtQylVtYFrFy1ke-M3AhMXanUYOUA4JaFiWXBQa0FoiKi5segFnZt/exec";
+    async function loadDashboard() {
+        const r = await fetch(`/api/staff-action?action=getHistory`);
+        const d = await r.json();
+        
+        // Update Table
+        document.getElementById('hist').innerHTML = d.map(h => `
+            <tr>
+                <td>${h.time}</td>
+                <td style="font-family: monospace;">${h.mobile}</td>
+                <td style="color: var(--gold); font-weight: 600;">${h.prize}</td>
+                <td><span class="badge ${h.status === 'CLAIMED' ? 'badge-claimed' : 'badge-pending'}">${h.status}</span></td>
+            </tr>
+        `).join('');
 
-async function loadDashboard() {
-    // We use a GET request to fetch history from GAS
-    const r = await fetch(`${scriptURL}?action=getHistory`);
-    const d = await r.json();
-    
-    document.getElementById('hist').innerHTML = d.map(h => `
-        <tr>
-            <td>${new Date(h.time).toLocaleTimeString()}</td>
-            <td style="font-family: monospace;">${h.mobile}</td>
-            <td style="color: var(--gold); font-weight: 600;">${h.prize}</td>
-            <td><span class="badge ${h.status === 'CLAIMED' ? 'badge-claimed' : 'badge-pending'}">${h.status}</span></td>
-        </tr>
-    `).join('');
-
-    document.getElementById('stat-total').innerText = d.length;
-    document.getElementById('stat-claimed').innerText = d.filter(x => x.status === 'CLAIMED').length;
-}
-
-async function check() {
-    const val = document.getElementById('codeInp').value.trim();
-    if(!val) return;
-    
-    const r = await fetch(`${scriptURL}?code=${val}&action=check`);
-    const d = await r.json();
-    const res = document.getElementById('res');
-    
-    res.style.display = 'block';
-    if(d.status === "VALID") {
-        res.style.background = "rgba(46, 204, 113, 0.1)";
-        res.style.border = "1px solid var(--green)";
-        document.getElementById('pTit').innerHTML = `<span style="color:var(--green)">Valid Prize:</span><br>${d.prize}`;
-        document.getElementById('redBtn').style.display = "block";
-    } else {
-        res.style.background = "rgba(231, 76, 60, 0.1)";
-        res.style.border = "1px solid var(--red)";
-        document.getElementById('pTit').innerHTML = `<span style="color:var(--red)">${d.message || 'Invalid Code'}</span>`;
-        document.getElementById('redBtn').style.display = "none";
+        // Update Stats
+        document.getElementById('stat-total').innerText = d.length;
+        document.getElementById('stat-claimed').innerText = d.filter(x => x.status === 'CLAIMED').length;
     }
-}
 
-async function redeem() {
-    const val = document.getElementById('codeInp').value.trim();
-    await fetch(`${scriptURL}?code=${val}&action=redeem`);
-    alert("Success! Prize marked as claimed.");
-    loadDashboard(); // Refresh without reloading page
-}
+    async function check() {
+        const val = document.getElementById('codeInp').value;
+        if(!val) return;
+        
+        const r = await fetch(`/api/staff-action?code=${val}&action=check`);
+        const d = await r.json();
+        const res = document.getElementById('res');
+        
+        res.style.display = 'block';
+        if(d.status === "VALID") {
+            res.style.background = "rgba(46, 204, 113, 0.1)";
+            res.style.border = "1px solid var(--green)";
+            document.getElementById('pTit').innerHTML = `<span style="color:var(--green)">Valid Prize:</span><br>${d.prize}`;
+            document.getElementById('redBtn').style.display = "block";
+        } else {
+            res.style.background = "rgba(231, 76, 60, 0.1)";
+            res.style.border = "1px solid var(--red)";
+            document.getElementById('pTit').innerHTML = `<span style="color:var(--red)">Invalid or Already Used</span>`;
+            document.getElementById('redBtn').style.display = "none";
+        }
+    }
+
+    async function redeem() {
+        const val = document.getElementById('codeInp').value;
+        await fetch(`/api/staff-action?code=${val}&action=redeem`);
+        alert("Success! Prize marked as claimed.");
+        location.reload();
+    }
+
     async function exportCSV() {
         const c = await (await fetch('/api/config')).json();
         window.open(c.sheet, '_blank');
