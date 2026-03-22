@@ -216,6 +216,7 @@ async function finalize() {
     // Celebrations
     if (winSfx) winSfx.play();
     confetti({ particleCount: 150, spread: 70, colors: ['#D4AF37', '#FFF'] });
+    }
 
 catch (err) {
     console.error("Fetch Failed:", err);
