@@ -27,7 +27,7 @@ async function launch() {
 function init() {
     ctx.fillStyle = '#C0C0C0'; ctx.fillRect(0,0,320,320);
     ctx.font = "bold 15px Poppins"; ctx.fillStyle = "rgba(0,0,0,0.2)"; ctx.textAlign = "center";
-    ctx.fillText("iPROMAX KOCHI", 160, 160);
+    ctx.fillText("Scratch Here", 160, 160);
 
     const start = (e) => { if(isDone) return; isActive = true; coin.style.display='block'; scratch(e); };
     const end = () => { isActive = false; sfx.pause(); coin.style.display='none'; };
