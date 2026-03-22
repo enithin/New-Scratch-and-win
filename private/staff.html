@@ -177,16 +177,23 @@ window.onload = function() {
         document.getElementById('stat-claimed').innerText = d.filter(x => x.status === 'CLAIMED').length;
     }
 
-    async function check() {
+   async function check() {
     const val = document.getElementById('codeInp').value.trim();
     if(!val) return;
     
     const btn = document.querySelector('.btn-gold');
     btn.innerText = "Searching...";
     
+    // We must use a proxy or a direct URL with correct headers
+    // For Google Apps Script, the 'redirect: follow' is the secret.
     try {
-        const r = await fetch(`${scriptURL}?code=${val}&action=check`);
-        const d = await r.json();
+        const response = await fetch(`${scriptURL}?code=${val}&action=check`, {
+            method: 'GET',
+            mode: 'cors', // If this fails, your Deployment 'Who has access' is not 'Anyone'
+            redirect: 'follow'
+        });
+
+        const d = await response.json();
         const res = document.getElementById('res');
         const sH = document.getElementById('statusHeader');
         
@@ -194,29 +201,21 @@ window.onload = function() {
         res.style.display = 'block';
 
         if(d.status === "VALID") {
-            // SUCCESS STATE
             sH.style.background = "var(--green)";
             sH.style.color = "#000";
             sH.innerText = "Verified Prize Found";
-            
             document.getElementById('resPhone').innerText = d.mobile;
             document.getElementById('pTit').innerText = d.prize;
             document.getElementById('actionArea').style.display = "block";
-            
-            // Add a little haptic feel if on mobile
-            if ("vibrate" in navigator) navigator.vibrate(50);
         } else {
-            // ERROR STATE
             sH.style.background = "var(--red)";
             sH.style.color = "#fff";
-            sH.innerText = d.message || "No Record Found";
-            
-            document.getElementById('resPhone').innerText = val;
-            document.getElementById('pTit').innerText = "Access Denied";
+            sH.innerText = d.message || "Invalid Code";
             document.getElementById('actionArea').style.display = "none";
         }
     } catch (err) {
-        alert("Connection Error. Check Apps Script Deployment.");
+        console.error(err);
+        alert("STILL BLOCKED: 1. Check if Deployment is set to 'Anyone'. 2. Make sure you updated the scriptURL to the one ending in /exec.");
     }
 }
     async function redeem() {
