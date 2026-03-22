@@ -188,21 +188,29 @@ async function finalize() {
         let total = 0; 
         gifts.forEach(g => total += g.weight);
         let rand = Math.random() * total;
-        let selectedPrize = gifts[0].name;
+       // ... weighted selection logic ...
+let winner = gifts[0].name; 
 
-        for (let g of gifts) {
-            if (rand < g.weight) {
-                selectedPrize = g.name;
-                break;
-            }
-            rand -= g.weight;
-        }
+for (let g of gifts) {
+    if (rand < g.weight) {
+        winner = g.name; 
+        break;
+    }
+    rand -= g.weight;
+}
 
-        // Final Reveal
-        const winID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
-        document.getElementById('wonText').innerText = selectedPrize;
-        document.getElementById('idBadge').innerText = `ID: ${winID}`;
-        
+// Update the UI using the correct variable name
+const winID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
+document.getElementById('wonText').innerText = winner;
+document.getElementById('idBadge').innerText = `ID: ${winID}`;
+
+// Update your WhatsApp/Save data to use 'winner' as well
+const winData = {
+    phone: userPhone,
+    prize: winner, // Match the variable here
+    code: winID
+};
+
         // Celebration
         if (winSfx) winSfx.play();
         confetti({ particleCount: 150, spread: 70, colors: ['#D4AF37', '#FFFFFF'] });
