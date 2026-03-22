@@ -1,4 +1,11 @@
-let config = {}, isDone = false, userPhone = "", isActive = false, isUnlocked = false;
+let config = {};
+let isDone = false;
+let isActive = false;
+let isUnlocked = false;
+let userPhone = "";
+let scratchTicks = 0; // The missing piece!
+const canvas = document.getElementById('scratchCanvas');
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
 const canvas = document.getElementById('scratchCanvas');
 const ctx = canvas.getContext('2d', { willReadFrequently: true });
 const coin = document.getElementById('scratch-coin');
