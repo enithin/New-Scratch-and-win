@@ -76,17 +76,38 @@
         }
 
         /* Result Reveal Area */
-        #capture-area {
-    background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
-    padding: 40px 20px;
-    border-radius: 25px;
-    border: 3px solid #D4AF37; /* Metallic Gold Border */
-    margin-bottom: 20px;
-    position: relative;
-    overflow: hidden;
-    text-align: center;
+       #capture-area {
+    padding: 30px 15px; /* Increase horizontal padding */
+    min-height: 250px;  /* Ensures the box stays a good size */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
+        #wonText {
+    font-size: 2rem; /* Reduced slightly from 2.5rem */
+    font-weight: 900;
+    color: #D4AF37;
+    margin: 15px 0;
+    text-transform: uppercase;
+    
+    /* THE FIX: Prevents overflow */
+    word-wrap: break-word;      /* Breaks long words */
+    overflow-wrap: break-word; 
+    max-width: 90%;            /* Keeps it away from the edges */
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.2;          /* Prevents overlap if it goes to 2 lines */
+    display: block;
+}
+
+/* For very small phones (iPhone SE, etc.) */
+@media (max-width: 360px) {
+    #wonText {
+        font-size: 1.6rem; 
+    }
+}
 /* Add a diagonal "Premium" stripe in the corner */
 #capture-area::before {
     content: 'OFFICIAL REWARD';
