@@ -1,13 +1,13 @@
-let config = {};
+let config = {
+    sheet: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-l3u_RPGWbhRy4UdOH1U7SJsfWTTTbocfFN_P0alnrtTUaN9L6RufbN9RAyrs7m1fM81xw3Y6mf3M/pub?output=csv",
+    whatsapp: "917306738779"
+};
 let isDone = false;
 let isActive = false;
 let isUnlocked = false;
 let userPhone = "";
 let scratchTicks = 0; // The missing piece!
-let config = {
-    sheet: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-l3u_RPGWbhRy4UdOH1U7SJsfWTTTbocfFN_P0alnrtTUaN9L6RufbN9RAyrs7m1fM81xw3Y6mf3M/pub?output=csv",
-    whatsapp: "917306738779"
-};
+
 const canvas = document.getElementById('scratchCanvas');
 const ctx = canvas.getContext('2d', { willReadFrequently: true });
 const coin = document.getElementById('scratch-coin');
@@ -42,6 +42,7 @@ function unlockScratch() {
     isUnlocked = true;
     if ("vibrate" in navigator) navigator.vibrate(50);
 }
+
 async function launch() {
     userPhone = document.getElementById('phone').value.trim();
     
