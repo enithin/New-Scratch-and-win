@@ -98,6 +98,52 @@
     </div>
 </div>
 
+    <div class="history-section" style="margin-top: 40px;">
+    <h2>Live Prize Manager</h2>
+    <div class="main-card">
+        <p style="font-size:0.75rem; color:#888; margin-bottom:15px;">Adjust prize names and winning weights (Higher weight = Higher chance).</p>
+        <div id="prize-list">
+            </div>
+        <button class="btn btn-outline" style="margin-top:15px; width:100%; border-color:var(--gold); color:var(--gold);" onclick="savePrizes()">💾 Save Prize Changes</button>
+    </div>
+</div>
+
+<script>
+    async function loadPrizes() {
+    const res = await fetch('/api/staff-action?action=getPrizes');
+    const prizes = await res.json();
+    const container = document.getElementById('prize-list');
+    
+    container.innerHTML = prizes.map((p, i) => `
+        <div class="prize-row" style="display:flex; gap:10px; margin-bottom:10px;">
+            <input type="text" value="${p.name}" class="p-name" style="flex:2; padding:8px;" placeholder="Prize Name">
+            <input type="number" value="${p.weight}" class="p-weight" style="flex:1; padding:8px;" placeholder="Weight">
+        </div>
+    `).join('');
+}
+
+async function savePrizes() {
+    const names = document.querySelectorAll('.p-name');
+    const weights = document.querySelectorAll('.p-weight');
+    let data = [];
+    
+    names.forEach((n, i) => {
+        if(n.value) data.push([n.value, weights[i].value || 1]);
+    });
+
+    const res = await fetch(`/api/staff-action?action=updatePrizes&data=${JSON.stringify(data)}`);
+    if(res.ok) {
+        alert("Prizes updated successfully!");
+        location.reload();
+    }
+}
+
+// Update your window.onload to include loadPrizes()
+window.onload = function() {
+    loadDashboard();
+    loadPrizes();
+};
+</script>
 <script>
     async function loadDashboard() {
         const r = await fetch(`/api/staff-action?action=getHistory`);
