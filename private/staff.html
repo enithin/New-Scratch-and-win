@@ -122,17 +122,27 @@
 </div>
 
 <script>
-    async function loadPrizes() {
-    const res = await fetch('/api/staff-action?action=getPrizes');
-    const prizes = await res.json();
-    const container = document.getElementById('prize-list');
-    
-    container.innerHTML = prizes.map((p, i) => `
-        <div class="prize-row" style="display:flex; gap:10px; margin-bottom:10px;">
-            <input type="text" value="${p.name}" class="p-name" style="flex:2; padding:8px;" placeholder="Prize Name">
-            <input type="number" value="${p.weight}" class="p-weight" style="flex:1; padding:8px;" placeholder="Weight">
-        </div>
-    `).join('');
+  async function loadPrizes() {
+    try {
+        const res = await fetch(`${scriptURL}?action=getPrizes`);
+        const prizes = await res.json();
+        const container = document.getElementById('prize-list');
+        
+        // THE FIX: Check if prizes is actually an array
+        if (!Array.isArray(prizes)) {
+            container.innerHTML = `<p style="color:red">Error: Prizes sheet not found or empty.</p>`;
+            return;
+        }
+        
+        container.innerHTML = prizes.map((p, i) => `
+            <div class="prize-row" style="display:flex; gap:10px; margin-bottom:10px;">
+                <input type="text" value="${p.name}" class="p-name" style="flex:2; padding:8px;" placeholder="Prize Name">
+                <input type="number" value="${p.weight}" class="p-weight" style="flex:1; padding:8px;" placeholder="Weight">
+            </div>
+        `).join('');
+    } catch (err) {
+        console.error("Load Prizes Error:", err);
+    }
 }
 
 async function savePrizes() {
