@@ -53,12 +53,13 @@ div::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
     z-index: 9999;
 }
 
-#scratch-container {
-    z-index: 100;
+#claim-box {
+    display: none; /* Controlled by JS */
+    z-index: 2000; /* Ensure it's higher than the canvas */
 }
 
-#login-box {
-    z-index: 50; /* Ensure this is lower than the scratch container */
+#scratch-container {
+    z-index: 100;
 }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 50px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 10px; transition: 0.3s; }
         .btn-gold { background: linear-gradient(45deg, #D4AF37, #F2D388); color: black; }
