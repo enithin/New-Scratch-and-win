@@ -12,7 +12,39 @@
         
         .card { background: #1a1a1a; padding: 30px; border-radius: 25px; border: 1px solid #333; width: 310px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); text-align: center; }
         input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--gold); background: #000; color: white; margin-bottom: 15px; text-align: center; font-size: 1.1rem; outline: none; }
-        
+        /* Modal Overlay Background */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px); /* Apple-style blur */
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+/* Modal Content Box */
+.modal-content {
+    background: #1a1a1a;
+    padding: 25px;
+    width: 85%;
+    max-width: 400px;
+    border-radius: 25px;
+    border: 1px solid #333;
+    box-shadow: 0 20px 60px rgba(0,0,0,1);
+    animation: modalPop 0.3s ease-out;
+}
+
+@keyframes modalPop {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Custom Scrollbar for T&C text */
+div::-webkit-scrollbar { width: 4px; }
+div::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
         #scratch-container { position: relative; width: 320px; height: 320px; border-radius: 20px; border: 2px solid var(--gold); overflow: hidden; display: none; background: #222; }
         canvas { position: absolute; top: 0; left: 0; z-index: 5; touch-action: none; transition: opacity 0.5s ease; }
         #scratch-coin { position: fixed; width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #eee, #c0c0c0, #888); border: 2px solid #aaa; z-index: 1000; pointer-events: none; display: none; transform: translate(-50%, -50%); }
