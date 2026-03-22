@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>iPromax Staff</title>
+    <style>
+        body { background: #0f0f0f; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .box { background: #1a1a1a; padding: 20px; border-radius: 20px; max-width: 350px; margin: auto; border: 1px solid #333; }
+        input { width: 80%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #444; background: #000; color: #fff; }
+        .btn { padding: 12px 25px; border-radius: 50px; border: none; background: #D4AF37; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Staff Portal</h2>
+    <div class="box">
+        <input type="text" id="codeInp" placeholder="Enter ID or Mobile">
+        <button class="btn" onclick="check()">VERIFY</button>
+        <div id="res" style="margin-top:20px; display:none; padding:15px; border-radius:10px;">
+            <h3 id="pTit"></h3>
+            <button id="redBtn" class="btn" style="background:white;" onclick="redeem()">REDEEM NOW</button>
+        </div>
+    </div>
+
+    <script>
+        async function check() {
+            const val = document.getElementById('codeInp').value;
+            const r = await fetch(`/api/staff-action?code=${val}&action=check`);
+            const d = await r.json();
+            const res = document.getElementById('res');
+            res.style.display = 'block';
+            if(d.status === "VALID") {
+                res.style.background = "#1b5e20";
+                document.getElementById('pTit').innerText = `${d.prize} ✅`;
+                document.getElementById('redBtn').style.display = "block";
+            } else {
+                res.style.background = "#b71c1c";
+                document.getElementById('pTit').innerText = "ALREADY USED ❌";
+                document.getElementById('redBtn').style.display = "none";
+            }
+        }
+        async function redeem() {
+            const val = document.getElementById('codeInp').value;
+            const r = await fetch(`/api/staff-action?code=${val}&action=redeem`);
+            alert("Redemption Logged!");
+            location.reload();
+        }
+    </script>
+</body>
+</html>
