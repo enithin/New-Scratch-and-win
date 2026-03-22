@@ -39,23 +39,41 @@
 <body>
     <div id="scratch-coin"></div>
 
-    <div id="login-box" class="card">
-        <img src="logo.png" style="width:140px; margin-bottom:20px;">
-        <input type="tel" id="phone" placeholder="Enter Mobile Number" maxlength="10">
-        
-        <div id="gate-1">
-            <p style="font-size: 0.75rem; color: var(--gold); margin-bottom: 10px;">⭐ Step 1: Support us with a review to unlock your gift!</p>
-            <button class="btn btn-blue" onclick="unlockReview()">1. WRITE GOOGLE REVIEW ⭐</button>
-        </div>
-
-        <div id="gate-2" style="display: none;">
-            <div style="font-size: 0.7rem; color: #888; margin-bottom: 10px; display: flex; gap: 5px; align-items: center;">
-                <input type="checkbox" id="tcCheck" style="accent-color: var(--gold);"> <span>I accept the T&C of iPromax Kochi</span>
-            </div>
-            <button class="btn btn-gold" onclick="launch()">2. START SCRATCHING</button>
-        </div>
+  <div id="login-box" class="card">
+    <div class="shimmer">
+        <img src="logo.png" class="logo-main" alt="iPromax">
+    </div>
+    
+    <input type="tel" id="phone" placeholder="Enter 10-Digit Mobile" maxlength="10">
+    
+    <div id="review-gate">
+        <p style="font-size: 0.8rem; color: var(--gold); margin-bottom: 10px;">⭐ Step 1: Support us with a review to unlock your gift!</p>
+        <button class="btn btn-blue" onclick="unlockScratch()">1. Write Google Review ⭐</button>
     </div>
 
+    <div id="scratch-gate" style="display: none; margin-top: 10px;">
+        <p style="font-size: 0.7rem; color: #888; margin-bottom: 15px;">
+            By clicking below, you agree to the 
+            <span style="color:var(--gold); text-decoration:underline; cursor:pointer; font-weight:600;" onclick="toggleModal(true)">Terms & Conditions</span>
+        </p>
+        <button class="btn btn-gold" onclick="launch()">AGREE & START SCRATCHING</button>
+    </div>
+</div>
+
+<div id="tcModal" class="modal-overlay" onclick="toggleModal(false)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 style="color:var(--gold); margin-top:0; border-bottom:1px solid #333; padding-bottom:10px;">iPromax T&C</h3>
+        <div style="font-size: 0.8rem; color: #ccc; line-height: 1.6; text-align: left; max-height: 300px; overflow-y: auto; padding-right: 10px;">
+            1. This offer is valid only at the <strong>iPromax Kochi</strong> branch.<br><br>
+            2. Only one scratch and one prize redemption is permitted per mobile number.<br><br>
+            3. A genuine Google Review must be posted to qualify for the reward.<br><br>
+            4. Rewards are non-transferable and cannot be exchanged for cash or credit.<br><br>
+            5. iPromax reserves the right to verify the review and mobile number at the service desk.<br><br>
+            6. The management reserves the right to modify or cancel the campaign at any time without prior notice.
+        </div>
+        <button class="btn btn-gold" style="margin-top:20px;" onclick="toggleModal(false)">I ACCEPT</button>
+    </div>
+</div>
     <div id="scratch-container">
         <canvas id="scratchCanvas" width="320" height="320"></canvas>
     </div>
