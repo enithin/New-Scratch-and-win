@@ -37,18 +37,30 @@ function init() {
 }
 
 function scratch(e) {
-    if(isDone || !isActive) return;
-    if(sfx.paused) sfx.play();
+    if (isDone || !isActive) return;
+
     const rect = canvas.getBoundingClientRect();
-    const cx = e.touches[0].clientX, cy = e.touches[0].clientY;
-    coin.style.left = `${cx}px`; coin.style.top = `${cy}px`;
-    if ("vibrate" in navigator) navigator.vibrate(5);
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath(); ctx.arc(cx-rect.left, cy-rect.top, 35, 0, Math.PI*2); ctx.fill();
     
-    const p = ctx.getImageData(0,0,320,320).data;
-    let wiped = 0; for(let i=3; i<p.length; i+=4) if(p[i]===0) wiped++;
-    if(wiped > (320*320*0.25)) finalize();
+    // Support both Touch (Mobile) and Mouse (PC)
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    // Move the coin graphic
+    coin.style.left = `${clientX}px`;
+    coin.style.top = `${clientY}px`;
+
+    // Erase the foil
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 35, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Check progress every 5 movements to save battery
+    scratchTicks++;
+    if (scratchTicks % 5 === 0) checkProgress();
 }
 
 async function finalize() {
