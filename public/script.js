@@ -236,8 +236,27 @@ fetch('/api/save-win', {
 });
 }
 function downloadPrize() {
-    html2canvas(document.querySelector("#capture-area")).then(c => {
-        const a = document.createElement('a'); a.download = 'iPromax-Winner.png'; a.href = c.toDataURL(); a.click();
+    const target = document.querySelector("#capture-area");
+    
+    // Add temporary "Vibrant" branding for the photo only
+    const btn = event.target;
+    btn.innerText = "Generating...";
+
+    html2canvas(target, {
+        backgroundColor: "#000",
+        scale: 2, // Double the resolution for a crisp image
+        logging: false,
+        useCORS: true
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `iPromax-Winner-${userPhone}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        
+        btn.innerText = "💾 SAVE TO PHOTOS";
+        
+        // Haptic feedback for completion
+        if ("vibrate" in navigator) navigator.vibrate(100);
     });
 }
 function claim() {
