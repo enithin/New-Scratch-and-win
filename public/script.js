@@ -171,35 +171,44 @@ async function finalize() {
     document.getElementById('wonText').innerText = "Verifying Reward..."; // Placeholder
 
     try {
-        // C. Fetch Data from your Server Config
-        const res = await fetch(config.sheet);
-        const csvData = await res.text();
-        
-        // D. Weighted Prize Logic
-        const lines = csvData.split('\n').slice(1);
-        const gifts = lines.map(line => {
-            const parts = line.split(',');
-            return { name: parts[0].trim(), weight: parseInt(parts[1]) || 1 };
-        });
+    // 1. Fetch the CSV
+    const response = await fetch(config.sheet);
+    const csvText = await response.text();
+    
+    // 2. CLEAN THE DATA: Filter out empty lines or CSS-like text
+    const lines = csvText.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0 && !line.startsWith(':root') && !line.includes('{'));
 
-        let totalWeight = gifts.reduce((sum, g) => sum + g.weight, 0);
-        let random = Math.random() * totalWeight;
-        let selected = gifts[0].name;
+    // 3. Skip the header row (Prize Name, Weight)
+    const prizeRows = lines.slice(1);
 
-        for (let g of gifts) {
-            if (random < g.weight) {
-                selected = g.name;
-                break;
-            }
-            random -= g.weight;
+    const gifts = prizeRows.map(l => {
+        const parts = l.split(',');
+        return { 
+            name: parts[0] ? parts[0].trim() : "Special Gift", 
+            weight: parseInt(parts[1]) || 1 
+        };
+    });
+
+    // 4. Weighted Random Selection
+    let total = 0; 
+    gifts.forEach(g => total += g.weight);
+    let rand = Math.random() * total;
+    let selectedPrize = gifts[0].name;
+
+    for (let g of gifts) {
+        if (rand < g.weight) {
+            selectedPrize = g.name;
+            break;
         }
+        rand -= g.weight;
+    }
 
-        const winID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
-
-        // E. Update UI with the real Prize
-        document.getElementById('wonText').innerText = selected;
-        document.getElementById('idBadge').innerText = `ID: ${winID}`;
-
+    // 5. Update the UI
+    const winID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
+    document.getElementById('wonText').innerText = selectedPrize;
+    document.getElementById('idBadge').innerText = `ID: ${winID}`;
         // F. Final Celebration
         confetti({
             particleCount: 150,
