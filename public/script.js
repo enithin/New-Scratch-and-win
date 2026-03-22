@@ -268,22 +268,26 @@ function claim() {
 
     // 5. Launch WhatsApp
     window.location.href = `https://wa.me/${whatsappNumber}?text=${message}`;
+}
+// --- ADD THIS TO THE VERY BOTTOM OF script.js ---
 
-    async function saveWinToGoogle(winData) {
-    // 1. YOUR APPS SCRIPT URL (Must end in /exec)
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwSOTrL7n1AFanDtQylVtYFrFy1ke-M3AhMXanUYOUA4JaFiWXBQa0FoiKi5segFnZt/exec";
+async function saveWinToGoogle(winData) {
+    // 1. YOUR APPS SCRIPT URL (Replace with your /exec link)
+    const scriptURL = "https://script.google.com/macros/s/AKfycb...YOUR_ID.../exec";
+
+    console.log("Sending data to Google Sheet...", winData);
 
     try {
+        // We use 'no-cors' for Google Apps Script to prevent the Fetch Error
         await fetch(scriptURL, {
             method: 'POST',
-            mode: 'no-cors', // CRITICAL: This bypasses the CORS "Fetch Error"
+            mode: 'no-cors', 
             cache: 'no-cache',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(winData)
         });
-        console.log("✅ Data sent to Google Sheet successfully!");
+        console.log("✅ Sync Complete!");
     } catch (err) {
-        console.error("❌ GAS Submission Error:", err);
+        console.error("❌ Google Sync Failed:", err);
     }
-}
 }
