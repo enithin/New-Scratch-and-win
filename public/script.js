@@ -158,17 +158,18 @@ async function finalize() {
     if (isDone) return;
     isDone = true;
 
-    // 1. Immediate UI Feedback
+    // 1. UI Transition
+    if (sfx) sfx.pause();
     canvas.style.opacity = "0"; 
     document.getElementById('scratch-container').style.display = 'none';
     document.getElementById('claim-box').style.display = 'block';
-    document.getElementById('wonText').innerText = "Verifying..."; 
+    document.getElementById('wonText').innerText = "Verifying Reward..."; 
 
     try {
+        // 2. Get Prizes from your verified CSV link
         const res = await fetch(config.sheet);
         const csvText = await res.text();
         
-        // 2. Clean the Data
         const lines = csvText.split(/\r?\n/)
             .map(line => line.trim())
             .filter(line => line.length > 0 && !line.includes('{') && !line.startsWith('<'));
@@ -182,45 +183,60 @@ async function finalize() {
             };
         });
 
-        // 3. Weighted Random Selection (Standardized to 'winner')
-        let total = 0; 
-        gifts.forEach(g => total += g.weight);
+        // 3. Selection
+        let total = 0; gifts.forEach(g => total += g.weight);
         let rand = Math.random() * total;
-        let winner = gifts[0].name; // <--- The variable starts here
-
+        let winner = gifts[0].name;
         for (let g of gifts) {
-            if (rand < g.weight) {
-                winner = g.name; // <--- Updated here
-                break;
-            }
+            if (rand < g.weight) { winner = g.name; break; }
             rand -= g.weight;
         }
 
         const winID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
 
-        // 4. Update the UI (Using 'winner')
-        document.getElementById('wonText').innerText = winner; // Fixed!
+        // 4. Update UI
+        document.getElementById('wonText').innerText = winner;
         document.getElementById('idBadge').innerText = `ID: ${winID}`;
         
-        // 5. Save to Google Apps Script
+        // 5. DATA SYNC (The part that was failing)
         const winData = {
             phone: userPhone,
-            prize: winner, // Fixed!
+            prize: winner,
             code: winID
         };
         
-        // Call your Google App Script function
+        // Call the helper function below
         saveWinToGoogle(winData);
 
-        // 6. Celebration
-        if (winSfx) winSfx.play();
+        // 6. Effects
+        if (winSfx) winSfx.play().catch(() => {});
         confetti({ particleCount: 150, spread: 70, colors: ['#D4AF37', '#FFFFFF'] });
 
     } catch (err) {
-        console.error("Reveal Error:", err);
-        document.getElementById('wonText').innerText = "Fetch Error - Ask Staff";
+        console.error("Finalize Error:", err);
+        document.getElementById('wonText').innerText = "Network Error - Try Again";
     }
 }
+
+// THIS MUST BE OUTSIDE THE FINALIZE FUNCTION (AT THE BOTTOM OF THE FILE)
+async function saveWinToGoogle(winData) {
+    // PASTE YOUR GOOGLE APPS SCRIPT /EXEC URL HERE
+    const scriptURL = "https://script.google.com/macros/s/AKfycb...YOUR_ID.../exec";
+
+    try {
+        await fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors', // Critical for Google Apps Script
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(winData)
+        });
+        console.log("✅ Sheet Sync Successful");
+    } catch (err) {
+        console.log("❌ Sheet Sync Failed", err);
+    }
+}
+
 function downloadPrize() {
     const target = document.querySelector("#capture-area");
     
@@ -269,25 +285,9 @@ function claim() {
     // 5. Launch WhatsApp
     window.location.href = `https://wa.me/${whatsappNumber}?text=${message}`;
 }
-// --- ADD THIS TO THE VERY BOTTOM OF script.js ---
 
-async function saveWinToGoogle(winData) {
-    // 1. YOUR APPS SCRIPT URL (Replace with your /exec link)
-    const scriptURL = "https://script.google.com/macros/s/AKfycb...YOUR_ID.../exec";
 
-    console.log("Sending data to Google Sheet...", winData);
 
-    try {
-        // We use 'no-cors' for Google Apps Script to prevent the Fetch Error
-        await fetch(scriptURL, {
-            method: 'POST',
-            mode: 'no-cors', 
-            cache: 'no-cache',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(winData)
-        });
-        console.log("✅ Sync Complete!");
-    } catch (err) {
         console.error("❌ Google Sync Failed:", err);
     }
 }
