@@ -218,5 +218,26 @@ function downloadPrize() {
     });
 }
 function claim() {
-    window.location.href = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent("Claiming prize: " + document.getElementById('wonText').innerText + " for mobile " + userPhone)}`;
+    // 1. Grab the Prize and ID directly from the UI
+    const prizeText = document.getElementById('wonText').innerText;
+    const redeemID = document.getElementById('idBadge').innerText;
+    
+    // 2. Safety Check: If it still says "Verifying", don't send yet
+    if (prizeText === "Verifying..." || prizeText === "---") {
+        return alert("Please wait for your prize to reveal first!");
+    }
+
+    // 3. Create the Premium Message
+    const message = `*iPromax Kochi Redemption* 🎁%0A%0A` +
+                    `Hello! I just won a prize at your Kochi store.%0A%0A` +
+                    `*Prize:* ${prizeText}%0A` +
+                    `*Redeem Code:* ${redeemID}%0A` +
+                    `*Mobile:* ${userPhone}%0A%0A` +
+                    `Please verify my reward!`;
+
+    // 4. Use the number from config or fallback to your direct number
+    const whatsappNumber = config.whatsapp || "917306738779";
+
+    // 5. Launch WhatsApp
+    window.location.href = `https://wa.me/${whatsappNumber}?text=${message}`;
 }
