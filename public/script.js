@@ -41,28 +41,33 @@ function scratch(e) {
 
     const rect = canvas.getBoundingClientRect();
     
-    // Support both Touch (Mobile) and Mouse (PC)
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    // Logic to pick the right coordinates based on device
+    let clientX, clientY;
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+    }
 
     const x = clientX - rect.left;
     const y = clientY - rect.top;
 
-    // Move the coin graphic
+    // Move the coin graphic to the pointer/finger
     coin.style.left = `${clientX}px`;
     coin.style.top = `${clientY}px`;
 
-    // Erase the foil
+    // The Erasing Logic
     ctx.globalCompositeOperation = 'destination-out';
     ctx.beginPath();
     ctx.arc(x, y, 35, 0, Math.PI * 2);
     ctx.fill();
     
-    // Check progress every 5 movements to save battery
+    // Performance: Only check win progress every 10th movement
     scratchTicks++;
-    if (scratchTicks % 5 === 0) checkProgress();
+    if (scratchTicks % 10 === 0) checkProgress();
 }
-
 async function finalize() {
     if(isDone) return; isDone = true;
     sfx.pause(); canvas.style.opacity = "0";
