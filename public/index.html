@@ -3,130 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scratch & Win | iPromax x KochiFix</title>
+    <title>VIP Scratch & Win | Exclusive Rewards</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        #scratch-container { position: relative; width: 300px; height: 150px; margin: 0 auto; user-select: none; }
-        canvas { position: absolute; top: 0; left: 0; cursor: crosshair; touch-action: none; border-radius: 12px; z-index: 10; }
-        .prize-underlay { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; border: 2px dashed #e5e7eb; border-radius: 12px; z-index: 5; }
+        .gold-gradient { background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); }
+        .glass-card { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        #scratch-container { position: relative; width: 320px; height: 180px; margin: 0 auto; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.15)); }
+        canvas { position: absolute; top: 0; left: 0; z-index: 20; cursor: crosshair; touch-action: none; border-radius: 20px; }
+        .prize-underlay { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; border-radius: 20px; z-index: 10; border: 2px solid #f8fafc; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-500 to-indigo-700 min-h-screen flex items-center justify-center p-4 font-sans">
+<body class="bg-slate-900 min-h-screen flex flex-col items-center justify-center p-4 font-sans text-slate-800">
 
-    <div id="step-1" class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Gift Campaign 🎁</h2>
-        <div class="text-sm text-gray-600 h-48 overflow-y-auto mb-6 p-4 bg-gray-50 rounded-lg border">
-            <p class="font-bold mb-2 text-gray-800">Terms & Conditions:</p>
-            <ul class="list-disc pl-4 space-y-2">
-                <li>Must provide a valid phone number to claim prizes.</li>
-                <li>One scratch card per Google Review.</li>
-                <li>Prizes must be redeemed at our Kochi/Trivandrum centers within 30 days.</li>
-                <li>Tampering with the digital scratcher voids the win.</li>
-            </ul>
+    <audio id="scratch-sound" src="scratch.mp3" preload="auto" loop></audio>
+
+    <div class="mb-6 text-center">
+        <div class="w-20 h-20 bg-white rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-2xl border-2 border-yellow-500 overflow-hidden">
+            <img src="https://via.placeholder.com/150?text=LOGO" alt="Logo" class="w-16">
         </div>
-        <button onclick="nextStep(2)" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all active:scale-95 shadow-lg">I Accept Terms</button>
+        <h1 class="text-white text-2xl font-black tracking-widest uppercase">Member Rewards</h1>
     </div>
 
-    <div id="step-2" class="hidden bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
-        <h2 class="text-2xl font-bold text-gray-800 mb-2 text-center">Almost There!</h2>
-        <p class="text-gray-500 text-center mb-6">Enter details and post a review to unlock your card.</p>
+    <div id="main-card" class="glass-card rounded-[2.5rem] shadow-2xl max-w-sm w-full overflow-hidden border-t-4 border-yellow-400">
         
-        <input type="text" id="userName" placeholder="Your Name" class="w-full p-3 mb-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-        <input type="tel" id="userPhone" placeholder="WhatsApp Number" class="w-full p-3 mb-6 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-
-        <a href="https://search.google.com/local/writereview?placeid=AIzaSyA6myHzS10YXdcazAFalmXvDkrYCp5cLc8" target="_blank" 
-           onclick="document.getElementById('reveal-btn').classList.remove('hidden')"
-           class="block w-full text-center bg-yellow-500 text-white py-3 rounded-lg font-bold mb-4 hover:bg-yellow-600">
-           Write Google Review ★★★★★
-        </a>
-
-        <button id="reveal-btn" onclick="nextStep(3)" class="hidden w-full bg-green-600 text-white py-3 rounded-lg font-bold animate-bounce">
-            I've Posted! Reveal Scratch Card
-        </button>
-    </div>
-
-    <div id="step-3" class="hidden bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Scratch to Win!</h2>
-        <p class="text-gray-500 mb-6">Rub the silver area with your finger or mouse.</p>
-
-        <div id="scratch-container">
-            <div class="prize-underlay">
-                <span class="text-gray-400 text-xs uppercase tracking-widest">You Won</span>
-                <span id="prize-text" class="text-2xl font-black text-green-600">Loading...</span>
+        <div id="step-1" class="p-8">
+            <h2 class="text-xl font-bold mb-2">Claim Your Gift</h2>
+            <p class="text-xs text-gray-500 mb-6 uppercase tracking-wider">Accept terms to begin</p>
+            
+            <div class="bg-gray-50 p-3 rounded-xl mb-6 text-[11px] text-gray-500 h-24 overflow-y-auto border">
+                <p>• Must be 18+ to participate.</p>
+                <p>• One prize per Google Review verification.</p>
+                <p>• Redeemable at Kochi/Trivandrum centers.</p>
+                <p>• Voucher valid for 30 days from win date.</p>
             </div>
-            <canvas id="scratch-canvas" width="300" height="150"></canvas>
+
+            <input type="text" id="userName" placeholder="Your Full Name" class="w-full p-4 mb-3 rounded-xl bg-gray-100 border-none outline-none focus:ring-2 focus:ring-yellow-500">
+            <input type="tel" id="userPhone" placeholder="WhatsApp Number" class="w-full p-4 mb-6 rounded-xl bg-gray-100 border-none outline-none focus:ring-2 focus:ring-yellow-500">
+            
+            <button onclick="nextStep(2)" class="w-full gold-gradient py-4 rounded-xl font-black text-slate-900 shadow-xl hover:brightness-105 transition active:scale-95">
+                START SCRATCHING
+            </button>
         </div>
 
-        <p id="status-msg" class="mt-8 text-sm text-gray-400 italic font-medium">Processing your win...</p>
+        <div id="step-2" class="hidden p-8 text-center">
+            <h2 class="text-xl font-bold mb-2">Unlock Your Card</h2>
+            <p class="text-sm text-gray-500 mb-8">Post a review on Google to activate the scratch surface.</p>
+            
+            <a href="https://search.google.com/local/writereview?placeid=YOUR_PLACE_ID" target="_blank" 
+               onclick="document.getElementById('unlock-btn').classList.remove('hidden')" 
+               class="block w-full bg-slate-900 text-white py-4 rounded-xl font-bold mb-4 shadow-lg">
+               1. Write Google Review ★
+            </a>
+            
+            <button id="unlock-btn" onclick="nextStep(3)" class="hidden w-full bg-green-600 text-white py-4 rounded-xl font-bold animate-pulse">
+               2. Reveal My Card
+            </button>
+        </div>
+
+        <div id="step-3" class="hidden p-8 pb-10 text-center">
+            <h2 class="text-xl font-bold mb-1">Reveal Your Prize</h2>
+            <p class="text-[10px] text-gray-400 mb-6 uppercase tracking-[0.2em]">Scratch over 50% to claim</p>
+            
+            <div id="scratch-container">
+                <div class="prize-underlay">
+                    <span id="voucher-id-display" class="absolute top-2 right-2 text-[8px] font-bold text-gray-300"></span>
+                    <span class="text-[10px] text-gray-400 uppercase font-black tracking-widest">Official Prize</span>
+                    <span id="prize-text" class="text-2xl font-black text-slate-900 px-4">...</span>
+                </div>
+                <canvas id="scratch-canvas" width="320" height="180"></canvas>
+            </div>
+            
+            <div id="status-box" class="mt-8">
+                <div class="text-xs text-gray-400 italic">Rub with your finger to scratch</div>
+            </div>
+        </div>
     </div>
 
     <script>
-        let isScratched = false;
-        const prizes = ["Flat 10% Off", "Free Tempered Glass", "Rs. 500 Cashback", "Better Luck Next Time"];
+        let isSaved = false;
+        const scratchSound = document.getElementById('scratch-sound');
+        const prizes = ["Flat 10% Off", "Free Tempered Glass", "Rs. 500 Discount", "Service 20% Off"];
         const selectedPrize = prizes[Math.floor(Math.random() * prizes.length)];
+        const uniqueID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
 
         function nextStep(step) {
-            document.querySelectorAll('body > div').forEach(div => div.classList.add('hidden'));
+            document.querySelectorAll('#main-card > div').forEach(div => div.classList.add('hidden'));
             document.getElementById(`step-${step}`).classList.remove('hidden');
-            if(step === 3) initScratchCard();
+            if(step === 3) initScratch();
         }
 
-        function initScratchCard() {
-            document.getElementById('prize-text').innerText = selectedPrize;
+        function initScratch() {
             const canvas = document.getElementById('scratch-canvas');
             const ctx = canvas.getContext('2d');
+            document.getElementById('prize-text').innerText = selectedPrize;
+            document.getElementById('voucher-id-display').innerText = `ID: ${uniqueID}`;
 
-            // Cover with Silver Layer
-            ctx.fillStyle = '#C0C0C0';
-            ctx.fillRect(0, 0, 300, 150);
-            
-            // Add "Scratch Here" text
-            ctx.fillStyle = '#7a7a7a';
-            ctx.font = 'bold 20px sans-serif';
+            // Create Gold Surface
+            ctx.fillStyle = '#d4af37'; 
+            ctx.fillRect(0, 0, 320, 180);
+            ctx.fillStyle = '#926a0a';
+            ctx.font = 'bold 16px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('SCRATCH HERE', 150, 85);
+            ctx.fillText('SCRATCH HERE', 160, 100);
 
-            const scratch = (e) => {
+            const handleScratch = (e) => {
                 const rect = canvas.getBoundingClientRect();
-                const x = (e.clientX || e.touches[0].clientX) - rect.left;
-                const y = (e.clientY || e.touches[0].clientY) - rect.top;
-                
+                const x = (e.clientX || (e.touches ? e.touches[0].clientX : 0)) - rect.left;
+                const y = (e.clientY || (e.touches ? e.touches[0].clientY : 0)) - rect.top;
+
+                if (window.navigator.vibrate) window.navigator.vibrate(10);
+                if (scratchSound.paused) scratchSound.play().catch(() => {});
+
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
                 ctx.arc(x, y, 25, 0, Math.PI * 2);
                 ctx.fill();
-
-                if(!isScratched) {
-                    isScratched = true;
-                    saveWinToSheet();
-                }
+                
+                checkProgress(canvas);
             };
 
-            canvas.addEventListener('mousemove', (e) => e.buttons === 1 && scratch(e));
-            canvas.addEventListener('touchmove', (e) => scratch(e));
+            const stopSound = () => { scratchSound.pause(); scratchSound.currentTime = 0; };
+
+            canvas.addEventListener('mousemove', (e) => e.buttons === 1 && handleScratch(e));
+            canvas.addEventListener('touchmove', (e) => handleScratch(e));
+            canvas.addEventListener('touchend', stopSound);
+            canvas.addEventListener('mouseup', stopSound);
         }
 
-        async function saveWinToSheet() {
-            const name = document.getElementById('userName').value;
-            const phone = document.getElementById('userPhone').value;
-            const msg = document.getElementById('status-msg');
-
-            try {
-                const response = await fetch('/api/save-winner', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, phone, prize: selectedPrize })
-                });
-
-                if (response.ok) {
-                    msg.innerText = "Win Recorded! Redirecting to home page...";
-                    msg.classList.add('text-green-500');
-                    // Return to previous page after 4 seconds
-                    setTimeout(() => { window.location.href = "https://your-main-site.com"; }, 4000);
-                }
-            } catch (err) {
-                console.error("Save error:", err);
+        function checkProgress(canvas) {
+            const ctx = canvas.getContext('2d');
+            const pixels = ctx.getImageData(0, 0, 320, 180).data;
+            let clear = 0;
+            for (let i = 3; i < pixels.length; i += 4) { if (pixels[i] === 0) clear++; }
+            
+            if ((clear / (320 * 180)) > 0.5 && !isSaved) {
+                isSaved = true;
+                handleWin();
             }
+        }
+
+        async function handleWin() {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#FFD700', '#FFFFFF'] });
+            
+            const expiry = new Date();
+            expiry.setDate(expiry.getDate() + 30);
+            const expStr = expiry.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+            const statusBox = document.getElementById('status-box');
+            statusBox.innerHTML = `
+                <div id="voucher-capture" class="bg-white p-6 rounded-2xl border-2 border-yellow-500 mb-6 text-center shadow-inner">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Prize Voucher</p>
+                    <h3 class="text-2xl font-black text-slate-900 my-2">${selectedPrize}</h3>
+                    <div class="h-px bg-gray-100 my-3"></div>
+                    <p class="text-[10px] text-red-500 font-bold uppercase">Expires: ${expStr}</p>
+                    <p class="text-[8px] text-gray-400 mt-1">Voucher ID: ${uniqueID}</p>
+                </div>
+                <div class="grid grid-cols-1 gap-2">
+                    <button onclick="saveImage()" class="bg-slate-900 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">📥 Save to Gallery</button>
+                    <button onclick="shareWA('${expStr}')" class="bg-[#25D366] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg">Claim on WhatsApp</button>
+                </div>
+            `;
+
+            // POST to your Render API
+            await fetch('/api/save-winner', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: document.getElementById('userName').value,
+                    phone: document.getElementById('userPhone').value,
+                    prize: selectedPrize,
+                    voucherId: uniqueID,
+                    expiry: expStr
+                })
+            });
+        }
+
+        function saveImage() {
+            html2canvas(document.getElementById('voucher-capture')).then(canvas => {
+                const a = document.createElement('a');
+                a.download = `Voucher-${uniqueID}.png`;
+                a.href = canvas.toDataURL();
+                a.click();
+            });
+        }
+
+        function shareWA(exp) {
+            const name = document.getElementById('userName').value;
+            const msg = `Hi! I'm ${name}. I won *${selectedPrize}*! \nVoucher ID: *${uniqueID}* \nExpires: ${exp}`;
+            window.open(`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(msg)}`, '_blank');
         }
     </script>
 </body>
