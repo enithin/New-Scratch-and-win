@@ -285,9 +285,4 @@ function claim() {
     // 5. Launch WhatsApp
     window.location.href = `https://wa.me/${whatsappNumber}?text=${message}`;
 }
-
-
-
-        console.error("❌ Google Sync Failed:", err);
-    }
 }
