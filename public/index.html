@@ -16,7 +16,18 @@
         #scratch-container { position: relative; width: 320px; height: 320px; border-radius: 20px; border: 2px solid var(--gold); overflow: hidden; display: none; background: #222; }
         canvas { position: absolute; top: 0; left: 0; z-index: 5; touch-action: none; transition: opacity 0.5s ease; }
         #scratch-coin { position: fixed; width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #eee, #c0c0c0, #888); border: 2px solid #aaa; z-index: 1000; pointer-events: none; display: none; transform: translate(-50%, -50%); }
+#scratch-coin {
+    pointer-events: none !important; /* This is the most common fix */
+    z-index: 9999;
+}
 
+#scratch-container {
+    z-index: 100;
+}
+
+#login-box {
+    z-index: 50; /* Ensure this is lower than the scratch container */
+}
         .btn { width: 100%; padding: 16px; border: none; border-radius: 50px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 10px; transition: 0.3s; }
         .btn-gold { background: linear-gradient(45deg, #D4AF37, #F2D388); color: black; }
         .btn-blue { background: #4285F4; color: white; }
