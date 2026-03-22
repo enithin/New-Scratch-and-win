@@ -250,28 +250,29 @@ async function saveWinToGoogle(winData) {
 
 function downloadPrize() {
     const target = document.querySelector("#capture-area");
-    
-    // Add temporary "Vibrant" branding for the photo only
-    const btn = event.target;
-    btn.innerText = "Generating...";
+    const btn = document.querySelector(".btn-save"); // Or whatever your button class is
+    if(btn) btn.innerText = "Generating...";
 
     html2canvas(target, {
         backgroundColor: "#000",
-        scale: 2, // Double the resolution for a crisp image
+        scale: 2,
         logging: false,
-        useCORS: true
-        x: -5, 
-        width: target.offsetWidth + 10
+        useCORS: true,
+        // THE FIX: Use colons (:) for all properties
+        x: 0, 
+        y: 0,
+        width: target.offsetWidth,
+        height: target.offsetHeight
     }).then(canvas => {
         const link = document.createElement('a');
-        link.download = `iPromax-Winner-${userPhone}.png`;
+        link.download = `iPromax-Reward.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
         
-        btn.innerText = "💾 SAVE TO PHOTOS";
-        
-        // Haptic feedback for completion
-        if ("vibrate" in navigator) navigator.vibrate(100);
+        if(btn) btn.innerText = "💾 SAVE TO PHOTOS";
+    }).catch(err => {
+        console.error("Capture Error:", err);
+        if(btn) btn.innerText = "❌ ERROR SAVING";
     });
 }
 function claim() {
