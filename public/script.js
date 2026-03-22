@@ -57,6 +57,26 @@ function init() {
     window.addEventListener('touchend', end);
 }
 
+function checkProgress() {
+    const imageData = ctx.getImageData(0, 0, 320, 320);
+    const pixels = imageData.data;
+    let transparentPixels = 0;
+
+    // We check every 4th value (the Alpha/Transparency channel)
+    for (let i = 3; i < pixels.length; i += 4) {
+        if (pixels[i] < 128) { // If pixel is more than 50% transparent
+            transparentPixels++;
+        }
+    }
+
+    // Calculate percentage: (scratched / total)
+    const percentScratched = transparentPixels / (320 * 320);
+
+    // If more than 25% is scratched, trigger the win
+    if (percentScratched > 0.25 && !isDone) {
+        finalize();
+    }
+}
 function scratch(e) {
     if (isDone || !isActive) return;
 
