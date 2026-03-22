@@ -42,53 +42,94 @@ app.post('/api/save-winner', async (req, res) => {
 // --- 3. ADMIN VIEW: PROTECTED DASHBOARD ---
 app.get('/admin-dashboard', async (req, res) => {
     const { pwd } = req.query;
-
-    if (pwd !== process.env.ADMIN_PASSWORD) {
-        return res.status(401).send("<h1>Access Denied</h1>");
-    }
+    if (pwd !== process.env.ADMIN_PASSWORD) return res.status(401).send("Unauthorized");
 
     try {
         await doc.loadInfo();
         const sheet = doc.sheetsByTitle['Winners'];
         const rows = await sheet.getRows();
 
-        let htmlRows = rows.map(row => `
-            <tr class="border-b hover:bg-gray-50">
-                <td class="p-3">${row.get('Timestamp')}</td>
-                <td class="p-3 font-semibold">${row.get('Name')}</td>
-                <td class="p-3 text-blue-600">${row.get('Phone')}</td>
-                <td class="p-3 text-green-700 font-bold">${row.get('Prize')}</td>
-                <td class="p-3 text-sm text-gray-500">${row.get('Status')}</td>
-            </tr>
-        `).reverse().join(''); // Show newest winners first
+        let htmlRows = rows.map(row => {
+            const status = row.get('Status');
+            const vId = row.get('VoucherID');
+            const isClaimed = status === 'Claimed';
+
+            return `
+                <tr class="border-b ${isClaimed ? 'bg-gray-100 opacity-60' : ''}">
+                    <td class="p-3 text-xs">${row.get('Timestamp')}</td>
+                    <td class="p-3 font-bold">${row.get('Name')}</td>
+                    <td class="p-3 font-mono text-blue-600">${vId}</td>
+                    <td class="p-3 font-bold text-green-700">${row.get('Prize')}</td>
+                    <td class="p-3">
+                        ${isClaimed 
+                            ? '<span class="text-gray-500 font-bold">✅ CLAIMED</span>' 
+                            : `<button onclick="markClaimed('${vId}')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold shadow hover:bg-blue-700">MARK CLAIMED</button>`
+                        }
+                    </td>
+                </tr>
+            `;
+        }).reverse().join('');
 
         res.send(`
             <html>
-                <head><script src="https://cdn.tailwindcss.com"></script></head>
+                <head>
+                    <script src="https://cdn.tailwindcss.com"></script>
+                    <script>
+                        async function markClaimed(id) {
+                            if(!confirm("Mark Voucher " + id + " as Claimed?")) return;
+                            const res = await fetch('/api/mark-claimed', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({ voucherId: id, pwd: '${pwd}' })
+                            });
+                            if(res.ok) location.reload();
+                        }
+                    </script>
+                </head>
                 <body class="bg-gray-100 p-4 md:p-10">
                     <div class="max-w-5xl mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden">
-                        <div class="bg-blue-600 p-6 text-white flex justify-between items-center">
-                            <h1 class="text-2xl font-bold">Scratch Card Winners</h1>
-                            <span class="bg-blue-800 px-3 py-1 rounded text-sm">Live Updates</span>
+                        <div class="bg-slate-900 p-6 text-white flex justify-between">
+                            <h1 class="text-2xl font-black">STATION VERIFICATION</h1>
+                            <button onclick="location.reload()" class="text-xs bg-slate-700 px-3 py-1 rounded">Refresh List</button>
                         </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead class="bg-gray-200">
-                                    <tr>
-                                        <th class="p-3">Time</th><th class="p-3">Name</th>
-                                        <th class="p-3">Contact</th><th class="p-3">Prize</th>
-                                        <th class="p-3">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${htmlRows}</tbody>
-                            </table>
-                        </div>
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-200 text-[10px] uppercase">
+                                <tr><th class="p-3">Date</th><th class="p-3">Customer</th><th class="p-3">ID</th><th class="p-3">Prize</th><th class="p-3">Action</th></tr>
+                            </thead>
+                            <tbody>${htmlRows}</tbody>
+                        </table>
                     </div>
                 </body>
             </html>
         `);
+    } catch (err) { res.status(500).send(err.message); }
+});
+
+// API: Staff Update Claim Status
+app.post('/api/mark-claimed', async (req, res) => {
+    const { voucherId, pwd } = req.body;
+
+    if (pwd !== process.env.ADMIN_PASSWORD) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    try {
+        await doc.loadInfo();
+        const sheet = doc.sheetsByTitle['Winners'];
+        const rows = await sheet.getRows();
+        
+        // Find the specific row by Voucher ID
+        const row = rows.find(r => r.get('VoucherID') === voucherId);
+
+        if (row) {
+            row.set('Status', 'Claimed'); // Update the cell
+            await row.save();
+            res.json({ success: true, message: `Voucher ${voucherId} marked as Claimed!` });
+        } else {
+            res.status(404).json({ success: false, message: "Voucher ID not found." });
+        }
     } catch (err) {
-        res.status(500).send("Error: " + err.message);
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
