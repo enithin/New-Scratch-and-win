@@ -171,63 +171,55 @@ async function finalize() {
     document.getElementById('wonText').innerText = "Verifying Reward..."; // Placeholder
 
     try {
-    // 1. Fetch the CSV
-    const response = await fetch(config.sheet);
-    const csvText = await response.text();
+    // 1. Fetch the data
+    const res = await fetch(config.sheet);
+    const rawData = await res.text();
     
-    // 2. CLEAN THE DATA: Filter out empty lines or CSS-like text
-    const lines = csvText.split('\n')
+    // 2. SAFETY FILTER: Skip any lines that look like CSS or HTML
+    const lines = rawData.split('\n')
         .map(line => line.trim())
-        .filter(line => line.length > 0 && !line.startsWith(':root') && !line.includes('{'));
+        .filter(line => {
+            return line.length > 0 && 
+                   !line.includes('{') && 
+                   !line.includes(':root') && 
+                   !line.startsWith('<');
+        });
 
-    // 3. Skip the header row (Prize Name, Weight)
+    // 3. Ensure we have data
+    if (lines.length < 2) throw new Error("No prizes found in CSV");
+
+    // 4. Parse Prizes (Skip the header row)
     const prizeRows = lines.slice(1);
-
     const gifts = prizeRows.map(l => {
         const parts = l.split(',');
         return { 
-            name: parts[0] ? parts[0].trim() : "Special Gift", 
+            name: parts[0] ? parts[0].trim() : "Surprise Gift", 
             weight: parseInt(parts[1]) || 1 
         };
     });
 
-    // 4. Weighted Random Selection
-    let total = 0; 
-    gifts.forEach(g => total += g.weight);
+    // 5. Weighted Selection
+    let total = 0; gifts.forEach(g => total += g.weight);
     let rand = Math.random() * total;
-    let selectedPrize = gifts[0].name;
+    let selected = gifts[0].name;
 
     for (let g of gifts) {
-        if (rand < g.weight) {
-            selectedPrize = g.name;
-            break;
-        }
+        if (rand < g.weight) { selected = g.name; break; }
         rand -= g.weight;
     }
 
-    // 5. Update the UI
-    const winID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
-    document.getElementById('wonText').innerText = selectedPrize;
+    // 6. Final UI Update
+    const winID = `IPX-${Math.floor(1000 + Math.random() * 9999)}`;
+    document.getElementById('wonText').innerText = selected;
     document.getElementById('idBadge').innerText = `ID: ${winID}`;
-        // F. Final Celebration
-        confetti({
-            particleCount: 150,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#D4AF37', '#FFFFFF', '#C0C0C0']
-        });
+    
+    // Celebrations
+    if (winSfx) winSfx.play();
+    confetti({ particleCount: 150, spread: 70, colors: ['#D4AF37', '#FFF'] });
 
-        // G. Sync back to Server/Google Sheets
-        fetch('/api/save-win', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: userPhone, prize: selected, code: winID })
-        });
-
-    } catch (err) {
-        console.error("Reveal Error:", err);
-        document.getElementById('wonText').innerText = "Connection Error - Please show staff";
-    }
+} catch (err) {
+    console.error("Fetch Failed:", err);
+    document.getElementById('wonText').innerText = "Network Error - Refresh Page";
 }
 function downloadPrize() {
     html2canvas(document.querySelector("#capture-area")).then(c => {
