@@ -76,13 +76,19 @@
         }
 
         /* Result Reveal Area */
-       #capture-area {
-    padding: 30px 15px; /* Increase horizontal padding */
-    min-height: 250px;  /* Ensures the box stays a good size */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+     #capture-area {
+    background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+    padding: 40px 20px;
+    border-radius: 25px;
+    border: 3px solid #D4AF37;
+    position: relative; /* REQUIRED for the ribbon to stay inside */
+    
+    /* THE FIX: Clips the ribbon so it doesn't stick out */
+    overflow: hidden; 
+    
+    text-align: center;
+    max-width: 350px; /* Adjust based on your phone screen width */
+    margin: 0 auto;
 }
 
         #wonText {
@@ -112,14 +118,19 @@
 #capture-area::before {
     content: 'OFFICIAL REWARD';
     position: absolute;
-    top: 20px;
-    right: -35px;
+    
+    /* Adjust these numbers to slide the ribbon */
+    top: 15px;      
+    right: -30px;   
+    
     background: #D4AF37;
     color: #000;
     font-size: 0.6rem;
     font-weight: 800;
-    padding: 5px 40px;
+    padding: 5px 35px;
     transform: rotate(45deg);
+    z-index: 10;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
 .vibrant-prize {
