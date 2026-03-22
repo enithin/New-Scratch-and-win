@@ -221,7 +221,7 @@ async function finalize() {
 // THIS MUST BE OUTSIDE THE FINALIZE FUNCTION (AT THE BOTTOM OF THE FILE)
 async function saveWinToGoogle(winData) {
     // PASTE YOUR GOOGLE APPS SCRIPT /EXEC URL HERE
-    const scriptURL = "https://script.google.com/macros/s/AKfycb...YOUR_ID.../exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwSOTrL7n1AFanDtQylVtYFrFy1ke-M3AhMXanUYOUA4JaFiWXBQa0FoiKi5segFnZt/exec";
 
     try {
         await fetch(scriptURL, {
@@ -284,5 +284,4 @@ function claim() {
 
     // 5. Launch WhatsApp
     window.location.href = `https://wa.me/${whatsappNumber}?text=${message}`;
-}
 }
