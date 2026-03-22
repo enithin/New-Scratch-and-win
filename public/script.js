@@ -268,4 +268,22 @@ function claim() {
 
     // 5. Launch WhatsApp
     window.location.href = `https://wa.me/${whatsappNumber}?text=${message}`;
+
+    async function saveWinToGoogle(winData) {
+    // 1. YOUR APPS SCRIPT URL (Must end in /exec)
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwSOTrL7n1AFanDtQylVtYFrFy1ke-M3AhMXanUYOUA4JaFiWXBQa0FoiKi5segFnZt/exec";
+
+    try {
+        await fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors', // CRITICAL: This bypasses the CORS "Fetch Error"
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(winData)
+        });
+        console.log("✅ Data sent to Google Sheet successfully!");
+    } catch (err) {
+        console.error("❌ GAS Submission Error:", err);
+    }
+}
 }
