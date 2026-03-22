@@ -232,7 +232,7 @@ async function finalize() {
 // THIS MUST BE OUTSIDE THE FINALIZE FUNCTION (AT THE BOTTOM OF THE FILE)
 async function saveWinToGoogle(winData) {
     // PASTE YOUR GOOGLE APPS SCRIPT /EXEC URL HERE
-    const scriptURL = "https://script.google.com/macros/s/AKfycbyLMVfsY_A-K5_hEYMyK6UYX_r0yteeOtwkbyL6LFDQM12_dM1gZ2tTGOU5yv1jWt7-/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycby57X7Cr5aL_Ll--moomsHu4enoTCwKKptUIW-SG6fK2Spvdm5QWo18BO1eIXqMyvPl/exec";
 
     try {
         await fetch(scriptURL, {
