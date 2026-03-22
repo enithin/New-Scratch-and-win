@@ -158,7 +158,7 @@ async function finalize() {
     if (isDone) return;
     isDone = true;
 
-    // Immediate UI Feedback
+    // 1. Immediate UI Feedback
     canvas.style.opacity = "0"; 
     document.getElementById('scratch-container').style.display = 'none';
     document.getElementById('claim-box').style.display = 'block';
@@ -168,14 +168,12 @@ async function finalize() {
         const res = await fetch(config.sheet);
         const csvText = await res.text();
         
-        // Split by lines and remove any empty lines or CSS/HTML leftovers
+        // 2. Clean the Data
         const lines = csvText.split(/\r?\n/)
             .map(line => line.trim())
             .filter(line => line.length > 0 && !line.includes('{') && !line.startsWith('<'));
 
-        // Skip the header row (Prize Name, Weight)
         const prizeRows = lines.slice(1);
-        
         const gifts = prizeRows.map(l => {
             const parts = l.split(',');
             return { 
@@ -184,34 +182,37 @@ async function finalize() {
             };
         });
 
-        // Weighted Random Selection
+        // 3. Weighted Random Selection (Standardized to 'winner')
         let total = 0; 
         gifts.forEach(g => total += g.weight);
         let rand = Math.random() * total;
-       // ... weighted selection logic ...
-let winner = gifts[0].name; 
+        let winner = gifts[0].name; // <--- The variable starts here
 
-for (let g of gifts) {
-    if (rand < g.weight) {
-        winner = g.name; 
-        break;
-    }
-    rand -= g.weight;
-}
+        for (let g of gifts) {
+            if (rand < g.weight) {
+                winner = g.name; // <--- Updated here
+                break;
+            }
+            rand -= g.weight;
+        }
 
-// Update the UI using the correct variable name
-const winID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
-document.getElementById('wonText').innerText = winner;
-document.getElementById('idBadge').innerText = `ID: ${winID}`;
+        const winID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
 
-// Update your WhatsApp/Save data to use 'winner' as well
-const winData = {
-    phone: userPhone,
-    prize: winner, // Match the variable here
-    code: winID
-};
+        // 4. Update the UI (Using 'winner')
+        document.getElementById('wonText').innerText = winner; // Fixed!
+        document.getElementById('idBadge').innerText = `ID: ${winID}`;
+        
+        // 5. Save to Google Apps Script
+        const winData = {
+            phone: userPhone,
+            prize: winner, // Fixed!
+            code: winID
+        };
+        
+        // Call your Google App Script function
+        saveWinToGoogle(winData);
 
-        // Celebration
+        // 6. Celebration
         if (winSfx) winSfx.play();
         confetti({ particleCount: 150, spread: 70, colors: ['#D4AF37', '#FFFFFF'] });
 
@@ -219,29 +220,6 @@ const winData = {
         console.error("Reveal Error:", err);
         document.getElementById('wonText').innerText = "Fetch Error - Ask Staff";
     }
-    // Inside your finalize() function, right after the prize is selected:
-const winData = {
-    phone: userPhone,
-    prize: selectedPrize,
-    code: winID,
-    timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-};
-
-console.log("Attempting to save win:", winData);
-
-// SEND TO SERVER
-fetch('/api/save-win', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(winData)
-})
-.then(response => {
-    if (!response.ok) throw new Error('Server side save failed');
-    console.log("✅ Sheet updated successfully!");
-})
-.catch(err => {
-    console.error("❌ Google Sheet Sync Error:", err);
-});
 }
 function downloadPrize() {
     const target = document.querySelector("#capture-area");
