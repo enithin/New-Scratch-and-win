@@ -222,12 +222,12 @@ catch (err) {
     console.error("Fetch Failed:", err);
     document.getElementById('wonText').innerText = "Network Error - Refresh Page";
 }
+}
 function downloadPrize() {
     html2canvas(document.querySelector("#capture-area")).then(c => {
         const a = document.createElement('a'); a.download = 'iPromax-Winner.png'; a.href = c.toDataURL(); a.click();
     });
 }
-
 function claim() {
     window.location.href = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent("Claiming prize: " + document.getElementById('wonText').innerText + " for mobile " + userPhone)}`;
 }
