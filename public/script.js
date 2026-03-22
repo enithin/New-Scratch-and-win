@@ -1,6 +1,6 @@
 let config = {
     sheet: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-l3u_RPGWbhRy4UdOH1U7SJsfWTTTbocfFN_P0alnrtTUaN9L6RufbN9RAyrs7m1fM81xw3Y6mf3M/pub?output=csv",
-    whatsapp: "917306738779"
+    whatsapp: "917034411997"
 };
 let isDone = false;
 let isActive = false;
