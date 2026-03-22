@@ -14,12 +14,6 @@ const coin = document.getElementById('scratch-coin');
 const sfx = document.getElementById('sfx');
 const winSfx = document.getElementById('winSfx');
 
-function unlockScratch() {
-    window.open("https://search.google.com/local/writereview?placeid=ChIJLytlO64NCDsRVhE0w4DRZTg&rate=5", "_blank");
-    document.getElementById('gate-1').style.display = 'none';
-    document.getElementById('gate-2').style.display = 'block';
-    isUnlocked = true;
-}
 
 // Function to Open/Close Modal
 function toggleModal(show) {
