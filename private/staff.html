@@ -42,7 +42,43 @@
             const r = await fetch(`/api/staff-action?code=${val}&action=redeem`);
             alert("Redemption Logged!");
             location.reload();
+
+            async function exportLeads() {
+    const btn = event.target;
+    btn.innerText = "PREPARING FILE...";
+    
+    try {
+        // 1. Fetch the raw CSV data from the sheet
+        // Use the SHEET_CSV_URL variable you already have in your config
+        const configRes = await fetch('/api/config');
+        const config = await configRes.json();
+        
+        const response = await fetch(config.sheet);
+        const csvData = await response.text();
+        
+        // 2. Create a Blob and Download Link
+        const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        
+        const date = new Date().toISOString().split('T')[0];
+        link.setAttribute("href", url);
+        link.setAttribute("download", `iPromax_Kochi_Leads_${date}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        btn.innerText = "📊 DOWNLOAD MARKETING LIST (CSV)";
+    } catch (e) {
+        alert("Export failed. Check internet connection.");
+        btn.innerText = "📊 DOWNLOAD MARKETING LIST (CSV)";
+    }
+}
         }
     </script>
+
+    
 </body>
 </html>
