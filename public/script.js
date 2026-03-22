@@ -35,13 +35,24 @@ function unlockScratch() {
 }
 async function launch() {
     userPhone = document.getElementById('phone').value.trim();
-    if (userPhone.length !== 10) return alert("Enter 10-digit mobile");
-    if (!document.getElementById('tcCheck').checked) return alert("Accept T&C first");
     
-    const res = await fetch('/api/config');
-    config = await res.json();
+    // 1. Check if phone is valid
+    if (userPhone.length !== 10) {
+        return alert("Please enter a valid 10-digit mobile number.");
+    }
+
+    // 2. Check if the user unlocked the review gate first
+    if (!isUnlocked) {
+        return alert("Please complete Step 1 (Google Review) first!");
+    }
+
+    // Since they clicked the "AGREE & START" button, 
+    // we already know they agreed. No need to check a box!
+    
     document.getElementById('login-box').style.display = 'none';
     document.getElementById('scratch-container').style.display = 'block';
+    
+    // Start the scratch engine
     init();
 }
 
