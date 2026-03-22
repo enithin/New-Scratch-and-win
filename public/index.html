@@ -3,67 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scratch & Win!</title>
+    <title>Scratch & Win | iPromax x KochiFix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         #scratch-container { position: relative; width: 300px; height: 150px; margin: 0 auto; user-select: none; }
-        canvas { position: absolute; top: 0; left: 0; cursor: crosshair; touch-action: none; border-radius: 8px; }
-        .prize-text { position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem; background: #f3f4f6; border-radius: 8px; z-index: 0; }
+        canvas { position: absolute; top: 0; left: 0; cursor: crosshair; touch-action: none; border-radius: 12px; z-index: 10; }
+        .prize-underlay { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; border: 2px dashed #e5e7eb; border-radius: 12px; z-index: 5; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gradient-to-br from-blue-500 to-indigo-700 min-h-screen flex items-center justify-center p-4 font-sans">
 
-    <div id="step-terms" class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
-        <h2 class="text-2xl font-bold mb-4">Terms & Conditions</h2>
-        <div class="text-sm text-gray-600 h-40 overflow-y-scroll mb-4 border-p-2 border rounded">
-            <p>1. One entry per person. 2. You must post a genuine Google Review to claim your prize. 3. Prizes cannot be exchanged for cash. 4. We reserve the right to verify reviews before fulfillment.</p>
+    <div id="step-1" class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Gift Campaign 🎁</h2>
+        <div class="text-sm text-gray-600 h-48 overflow-y-auto mb-6 p-4 bg-gray-50 rounded-lg border">
+            <p class="font-bold mb-2 text-gray-800">Terms & Conditions:</p>
+            <ul class="list-disc pl-4 space-y-2">
+                <li>Must provide a valid phone number to claim prizes.</li>
+                <li>One scratch card per Google Review.</li>
+                <li>Prizes must be redeemed at our Kochi/Trivandrum centers within 30 days.</li>
+                <li>Tampering with the digital scratcher voids the win.</li>
+            </ul>
         </div>
-        <button onclick="showStep('step-review')" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">I Accept & Start</button>
+        <button onclick="nextStep(2)" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all active:scale-95 shadow-lg">I Accept Terms</button>
     </div>
 
-    <div id="step-review" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
-        <h2 class="text-2xl font-bold mb-2">Leave a Review</h2>
-        <p class="mb-6 text-gray-600">Post a review on Google to unlock your scratch card!</p>
-        <a href="https://search.google.com/local/writereview?placeid=YOUR_PLACE_ID" target="_blank" class="block w-full bg-yellow-500 text-white py-3 rounded-lg font-bold mb-4">Open Google Reviews</a>
-        <button onclick="showStep('step-scratch')" class="text-blue-600 underline">I've already posted my review</button>
+    <div id="step-2" class="hidden bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2 text-center">Almost There!</h2>
+        <p class="text-gray-500 text-center mb-6">Enter details and post a review to unlock your card.</p>
+        
+        <input type="text" id="userName" placeholder="Your Name" class="w-full p-3 mb-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+        <input type="tel" id="userPhone" placeholder="WhatsApp Number" class="w-full p-3 mb-6 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+
+        <a href="https://search.google.com/local/writereview?placeid=YOUR_GOOGLE_PLACE_ID" target="_blank" 
+           onclick="document.getElementById('reveal-btn').classList.remove('hidden')"
+           class="block w-full text-center bg-yellow-500 text-white py-3 rounded-lg font-bold mb-4 hover:bg-yellow-600">
+           Write Google Review ★★★★★
+        </a>
+
+        <button id="reveal-btn" onclick="nextStep(3)" class="hidden w-full bg-green-600 text-white py-3 rounded-lg font-bold animate-bounce">
+            I've Posted! Reveal Scratch Card
+        </button>
     </div>
 
-    <div id="step-scratch" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
-        <h2 class="text-2xl font-bold mb-6">Scratch to Reveal!</h2>
+    <div id="step-3" class="hidden bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Scratch to Win!</h2>
+        <p class="text-gray-500 mb-6">Rub the silver area with your finger or mouse.</p>
+
         <div id="scratch-container">
-            <div class="prize-text" id="prize-display">Loading Prize...</div>
-            <canvas id="bridge" width="300" height="150"></canvas>
+            <div class="prize-underlay">
+                <span class="text-gray-400 text-xs uppercase tracking-widest">You Won</span>
+                <span id="prize-text" class="text-2xl font-black text-green-600">Loading...</span>
+            </div>
+            <canvas id="scratch-canvas" width="300" height="150"></canvas>
         </div>
-        <p id="status-msg" class="mt-4 text-sm text-gray-500 italic">Scratch at least 50% to claim</p>
+
+        <p id="status-msg" class="mt-8 text-sm text-gray-400 italic font-medium">Processing your win...</p>
     </div>
 
     <script>
-        const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL';
-        const PREVIOUS_PAGE = 'https://yourwebsite.com';
-        let selectedPrize = "Better Luck Next Time!";
+        let isScratched = false;
+        const prizes = ["Flat 10% Off", "Free Tempered Glass", "Rs. 500 Cashback", "Better Luck Next Time"];
+        const selectedPrize = prizes[Math.floor(Math.random() * prizes.length)];
 
-        function showStep(stepId) {
+        function nextStep(step) {
             document.querySelectorAll('body > div').forEach(div => div.classList.add('hidden'));
-            document.getElementById(stepId).classList.remove('hidden');
-            if(stepId === 'step-scratch') initScratch();
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+            if(step === 3) initScratchCard();
         }
 
-        async function initScratch() {
-            // Pre-fetch prize (simulated logic)
-            selectedPrize = "Surprise Gift! 🎁"; 
-            document.getElementById('prize-display').innerText = selectedPrize;
-
-            const canvas = document.getElementById('bridge');
+        function initScratchCard() {
+            document.getElementById('prize-text').innerText = selectedPrize;
+            const canvas = document.getElementById('scratch-canvas');
             const ctx = canvas.getContext('2d');
-            
-            // Fill with scratch layer
+
+            // Cover with Silver Layer
             ctx.fillStyle = '#C0C0C0';
             ctx.fillRect(0, 0, 300, 150);
-            ctx.fillStyle = '#8e8e8e';
-            ctx.font = '20px Arial';
-            ctx.fillText('SCRATCH HERE', 75, 85);
-
-            let isDrawing = false;
+            
+            // Add "Scratch Here" text
+            ctx.fillStyle = '#7a7a7a';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('SCRATCH HERE', 150, 85);
 
             const scratch = (e) => {
                 const rect = canvas.getBoundingClientRect();
@@ -72,39 +93,40 @@
                 
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
-                ctx.arc(x, y, 20, 0, Math.PI * 2);
+                ctx.arc(x, y, 25, 0, Math.PI * 2);
                 ctx.fill();
-                checkScratchPercentage();
+
+                if(!isScratched) {
+                    isScratched = true;
+                    saveWinToSheet();
+                }
             };
 
-            canvas.addEventListener('mousedown', () => isDrawing = true);
-            canvas.addEventListener('touchstart', () => isDrawing = true);
-            window.addEventListener('mouseup', () => isDrawing = false);
-            window.addEventListener('touchend', () => isDrawing = false);
-            canvas.addEventListener('mousemove', (e) => isDrawing && scratch(e));
-            canvas.addEventListener('touchmove', (e) => isDrawing && scratch(e));
+            canvas.addEventListener('mousemove', (e) => e.buttons === 1 && scratch(e));
+            canvas.addEventListener('touchmove', (e) => scratch(e));
         }
 
-        function checkScratchPercentage() {
-            // Logic to send data to sheet and redirect after delay
-            const canvas = document.getElementById('bridge');
-            // Simplified "Done" trigger
-            setTimeout(() => {
-                if(!window.sent) {
-                    window.sent = true;
-                    saveWinner();
+        async function saveWinToSheet() {
+            const name = document.getElementById('userName').value;
+            const phone = document.getElementById('userPhone').value;
+            const msg = document.getElementById('status-msg');
+
+            try {
+                const response = await fetch('/api/save-winner', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, phone, prize: selectedPrize })
+                });
+
+                if (response.ok) {
+                    msg.innerText = "Win Recorded! Redirecting to home page...";
+                    msg.classList.add('text-green-500');
+                    // Return to previous page after 4 seconds
+                    setTimeout(() => { window.location.href = "https://your-main-site.com"; }, 4000);
                 }
-            }, 5000); // Wait 5 seconds after scratching starts
-        }
-
-        async function saveWinner() {
-            document.getElementById('status-msg').innerText = "Saving your win... Redirecting soon.";
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ name: "User", email: "user@example.com", prize: selectedPrize })
-            });
-            setTimeout(() => { window.location.href = PREVIOUS_PAGE; }, 2000);
+            } catch (err) {
+                console.error("Save error:", err);
+            }
         }
     </script>
 </body>
