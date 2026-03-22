@@ -4,6 +4,10 @@ let isActive = false;
 let isUnlocked = false;
 let userPhone = "";
 let scratchTicks = 0; // The missing piece!
+let config = {
+    sheet: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-l3u_RPGWbhRy4UdOH1U7SJsfWTTTbocfFN_P0alnrtTUaN9L6RufbN9RAyrs7m1fM81xw3Y6mf3M/pub?output=csv",
+    whatsapp: "917306738779"
+};
 const canvas = document.getElementById('scratchCanvas');
 const ctx = canvas.getContext('2d', { willReadFrequently: true });
 const coin = document.getElementById('scratch-coin');
@@ -159,69 +163,59 @@ async function finalize() {
     if (isDone) return;
     isDone = true;
 
-    // A. Immediate Sensory Feedback
-    if ("vibrate" in navigator) navigator.vibrate([100, 50, 200]);
-    canvas.style.opacity = "0"; // Smooth fade out the silver
-    if (sfx) sfx.pause();
-    if (winSfx) winSfx.play().catch(() => {});
-
-    // B. Show the Card Immediately (Prevents "Blank Screen" feel)
+    // Immediate UI Feedback
+    canvas.style.opacity = "0"; 
     document.getElementById('scratch-container').style.display = 'none';
     document.getElementById('claim-box').style.display = 'block';
-    document.getElementById('wonText').innerText = "Verifying Reward..."; // Placeholder
+    document.getElementById('wonText').innerText = "Verifying..."; 
 
     try {
-    // 1. Fetch the data
-    const res = await fetch(config.sheet);
-    const rawData = await res.text();
-    
-    // 2. SAFETY FILTER: Skip any lines that look like CSS or HTML
-    const lines = rawData.split('\n')
-        .map(line => line.trim())
-        .filter(line => {
-            return line.length > 0 && 
-                   !line.includes('{') && 
-                   !line.includes(':root') && 
-                   !line.startsWith('<');
+        const res = await fetch(config.sheet);
+        const csvText = await res.text();
+        
+        // Split by lines and remove any empty lines or CSS/HTML leftovers
+        const lines = csvText.split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line.length > 0 && !line.includes('{') && !line.startsWith('<'));
+
+        // Skip the header row (Prize Name, Weight)
+        const prizeRows = lines.slice(1);
+        
+        const gifts = prizeRows.map(l => {
+            const parts = l.split(',');
+            return { 
+                name: parts[0] ? parts[0].replace(/"/g, '').trim() : "Special Gift", 
+                weight: parseInt(parts[1]) || 1 
+            };
         });
 
-    // 3. Ensure we have data
-    if (lines.length < 2) throw new Error("No prizes found in CSV");
+        // Weighted Random Selection
+        let total = 0; 
+        gifts.forEach(g => total += g.weight);
+        let rand = Math.random() * total;
+        let selectedPrize = gifts[0].name;
 
-    // 4. Parse Prizes (Skip the header row)
-    const prizeRows = lines.slice(1);
-    const gifts = prizeRows.map(l => {
-        const parts = l.split(',');
-        return { 
-            name: parts[0] ? parts[0].trim() : "Surprise Gift", 
-            weight: parseInt(parts[1]) || 1 
-        };
-    });
+        for (let g of gifts) {
+            if (rand < g.weight) {
+                selectedPrize = g.name;
+                break;
+            }
+            rand -= g.weight;
+        }
 
-    // 5. Weighted Selection
-    let total = 0; gifts.forEach(g => total += g.weight);
-    let rand = Math.random() * total;
-    let selected = gifts[0].name;
+        // Final Reveal
+        const winID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
+        document.getElementById('wonText').innerText = selectedPrize;
+        document.getElementById('idBadge').innerText = `ID: ${winID}`;
+        
+        // Celebration
+        if (winSfx) winSfx.play();
+        confetti({ particleCount: 150, spread: 70, colors: ['#D4AF37', '#FFFFFF'] });
 
-    for (let g of gifts) {
-        if (rand < g.weight) { selected = g.name; break; }
-        rand -= g.weight;
+    } catch (err) {
+        console.error("Reveal Error:", err);
+        document.getElementById('wonText').innerText = "Fetch Error - Ask Staff";
     }
-
-    // 6. Final UI Update
-    const winID = `IPX-${Math.floor(1000 + Math.random() * 9999)}`;
-    document.getElementById('wonText').innerText = selected;
-    document.getElementById('idBadge').innerText = `ID: ${winID}`;
-    
-    // Celebrations
-    if (winSfx) winSfx.play();
-    confetti({ particleCount: 150, spread: 70, colors: ['#D4AF37', '#FFF'] });
-    }
-
-catch (err) {
-    console.error("Fetch Failed:", err);
-    document.getElementById('wonText').innerText = "Network Error - Refresh Page";
-}
 }
 function downloadPrize() {
     html2canvas(document.querySelector("#capture-area")).then(c => {
