@@ -9,6 +9,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+// Add this route so your frontend can fetch the business details
+app.get('/api/business-info', (req, res) => {
+    res.json({
+        whatsapp: process.env.WHATSAPP_NUMBER,
+        placeId: process.env.GOOGLE_PLACE_ID
+    });
+});
 // 1. SESSION CONFIGURATION
 app.use(session({
     secret: 'ipromax-verification-secret-2026', // Use a random string
