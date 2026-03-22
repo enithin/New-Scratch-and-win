@@ -6,102 +6,62 @@
     <title>iPromax Kochi | Scratch & Win</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #D4AF37; --silver: #C0C0C0; --dark: #0f0f0f; --glass: rgba(255,255,255,0.05); }
-        html, body { height: 100%; margin: 0; padding: 0; background: var(--dark); color: white; font-family: 'Poppins', sans-serif; overflow: hidden; }
-        body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; }
-
-        /* Premium Logo & Shimmer */
-        .logo-container { margin-bottom: 25px; position: relative; display: inline-block; }
-        .logo-main { width: 150px; filter: drop-shadow(0 0 15px rgba(212,175,55,0.3)); }
-
-        /* Boxes */
-        #login-box, #claim-box { background: #1a1a1a; padding: 30px; border-radius: 25px; border: 1px solid #333; width: 310px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        input { width: 90%; padding: 15px; border-radius: 12px; border: 1px solid var(--gold); background: #000; color: white; margin-bottom: 15px; text-align: center; font-size: 1.1rem; outline: none; }
+        :root { --gold: #D4AF37; --dark: #0f0f0f; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--dark); color: white; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
         
-        /* Scratch Area */
+        .card { background: #1a1a1a; padding: 30px; border-radius: 25px; border: 1px solid #333; width: 310px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); text-align: center; }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--gold); background: #000; color: white; margin-bottom: 15px; text-align: center; font-size: 1.1rem; outline: none; }
+        
         #scratch-container { position: relative; width: 320px; height: 320px; border-radius: 20px; border: 2px solid var(--gold); overflow: hidden; display: none; background: #222; }
-        canvas { position: absolute; top: 0; left: 0; z-index: 5; touch-action: none; }
-        
-        /* Metal Coin Cursor */
-        #scratch-coin { position: fixed; width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #eee, #c0c0c0, #888); border: 2px solid #aaa; box-shadow: 2px 5px 15px rgba(0,0,0,0.5); z-index: 1000; pointer-events: none; display: none; transform: translate(-50%, -50%); }
+        canvas { position: absolute; top: 0; left: 0; z-index: 5; touch-action: none; transition: opacity 0.5s ease; }
+        #scratch-coin { position: fixed; width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #eee, #c0c0c0, #888); border: 2px solid #aaa; z-index: 1000; pointer-events: none; display: none; transform: translate(-50%, -50%); }
 
-        /* Winner Card */
-        #capture-area { background: linear-gradient(135deg, #1a1a1a 0%, #000 100%); padding: 35px 20px; border-radius: 25px; border: 2px solid var(--gold); margin-bottom: 15px; position: relative; overflow: hidden; }
-        #capture-area::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); opacity: 0.2; }
-        .vibrant-prize { font-size: 2.2rem; font-weight: 800; color: var(--gold); margin: 15px 0; text-transform: uppercase; }
-        .store-footer { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; font-size: 0.65rem; color: #aaa; line-height: 1.4; }
-
-        /* Buttons */
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 50px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; text-transform: uppercase; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 50px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 10px; transition: 0.3s; }
         .btn-gold { background: linear-gradient(45deg, #D4AF37, #F2D388); color: black; }
-        .btn-blue { background: #4285F4; color: white; animation: pulse 2s infinite; }
-        .btn-locked { background: #333; color: #666; cursor: not-allowed; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(66, 133, 244, 0); } 100% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0); } }
-
-        /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        .modal-content { background: #1a1a1a; padding: 25px; width: 80%; border-radius: 20px; border: 1px solid #333; }
+        .btn-blue { background: #4285F4; color: white; }
+        
+        #capture-area { background: linear-gradient(135deg, #1a1a1a 0%, #000 100%); padding: 35px 20px; border-radius: 25px; border: 2px solid var(--gold); margin-bottom: 15px; }
+        .vibrant-prize { font-size: 2.2rem; font-weight: 800; color: var(--gold); margin: 15px 0; }
     </style>
 </head>
 <body>
-
     <div id="scratch-coin"></div>
 
-    <div id="login-box">
-        <div class="logo-container shimmer">
-            <img src="logo.png" class="logo-main" alt="iPromax">
+    <div id="login-box" class="card">
+        <img src="logo.png" style="width:140px; margin-bottom:20px;">
+        <input type="tel" id="phone" placeholder="Enter Mobile Number" maxlength="10">
+        
+        <div id="gate-1">
+            <p style="font-size: 0.75rem; color: var(--gold); margin-bottom: 10px;">⭐ Step 1: Support us with a review to unlock your gift!</p>
+            <button class="btn btn-blue" onclick="unlockReview()">1. WRITE GOOGLE REVIEW ⭐</button>
         </div>
-        <input type="tel" id="phone" placeholder="Enter 10-Digit Mobile" maxlength="10">
-        <div style="font-size: 0.75rem; color: #888; margin-bottom: 15px; text-align: left; display: flex; gap: 8px;">
-            <input type="checkbox" id="tcCheck" style="width:16px; height:16px; accent-color:var(--gold);">
-            <span>I accept <span style="color:var(--gold); text-decoration:underline;" onclick="toggleModal(true)">Terms & Conditions</span></span>
+
+        <div id="gate-2" style="display: none;">
+            <div style="font-size: 0.7rem; color: #888; margin-bottom: 10px; display: flex; gap: 5px; align-items: center;">
+                <input type="checkbox" id="tcCheck" style="accent-color: var(--gold);"> <span>I accept the T&C of iPromax Kochi</span>
+            </div>
+            <button class="btn btn-gold" onclick="launch()">2. START SCRATCHING</button>
         </div>
-        <button class="btn btn-gold" onclick="launch()">START SCRATCHING</button>
     </div>
 
     <div id="scratch-container">
-        <div style="position:absolute; width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#444; font-weight:bold;">REVEALING GIFT...</div>
         <canvas id="scratchCanvas" width="320" height="320"></canvas>
     </div>
 
-    <div id="claim-box" style="display:none;">
+    <div id="claim-box" class="card" style="display:none;">
         <div id="capture-area">
             <img src="logo.png" style="width: 80px; margin-bottom: 10px;">
             <h2 id="wonText" class="vibrant-prize"></h2>
-            <div id="idBadge" style="font-family:monospace; color:#888; font-size:0.8rem;"></div>
-            <div class="store-footer">
-                <strong>iPromax - Apple Service Centre</strong><br>
-                📍 JLN Stadium Round, Kochi, Kerala<br>
-                ⏰ 10:00 AM - 8:00 PM
-            </div>
+            <div id="idBadge" style="font-family:monospace; color:#888;"></div>
+            <div style="font-size: 0.6rem; color: #666; margin-top: 15px;">iPromax Kochi Apple Service Centre</div>
         </div>
-        
-        <p id="lock-msg" style="font-size: 0.75rem; color: var(--gold); margin-bottom: 5px;">⭐ Step 1: Post a review to unlock reward</p>
-        <button class="btn btn-blue" id="reviewBtn" onclick="review()">1. POST 5-STAR REVIEW ⭐</button>
-
-        <div id="unlocked-actions" style="display: none; margin-top: 10px;">
-            <button class="btn" style="background:#444; color:white;" onclick="downloadPrize()">💾 SAVE TO PHOTOS</button>
-            <button class="btn" style="background:#25D366; color:white;" onclick="claim()">2. CLAIM ON WHATSAPP ✅</button>
-        </div>
+        <button class="btn" style="background:#444; color:white;" onclick="downloadPrize()">💾 SAVE TO PHOTOS</button>
+        <button class="btn" style="background:#25D366; color:white;" onclick="claim()">CLAIM ON WHATSAPP ✅</button>
     </div>
 
-    <div id="tcModal" class="modal-overlay" onclick="toggleModal(false)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h3 style="color:var(--gold); margin-top:0;">iPromax T&C</h3>
-            <p style="font-size: 0.8rem; color: #ccc; line-height: 1.5;">
-  1.Valid only at Kochi branch.<br>
-  2.One prize per person.<br>
-  3.Ipromax have sole descretion to withdraw/Cancel Reward Program without prior notice.<br>
-  4.Review will be validated by staff at front desk.<br>
-  5.Gift coupons can not be redeemed as cash<br>
-</p>
-            <button class="btn btn-gold" onclick="toggleModal(false)">CLOSE</button>
-        </div>
-    </div>
-
-    <audio id="sfx" src="scratch.mp3" loop preload="auto"></audio>
-    <audio id="winSfx" src="win.mp3" preload="auto"></audio>
-
+    <audio id="sfx" src="scratch.mp3" loop></audio>
+    <audio id="winSfx" src="win.mp3"></audio>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script src="script.js"></script>
