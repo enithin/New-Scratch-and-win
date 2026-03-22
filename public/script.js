@@ -57,14 +57,38 @@ async function launch() {
 }
 
 function init() {
-    ctx.fillStyle = '#C0C0C0'; ctx.fillRect(0,0,320,320);
-    ctx.font = "bold 15px Poppins"; ctx.fillStyle = "rgba(0,0,0,0.2)"; ctx.textAlign = "center";
-    ctx.fillText("Scratch Here", 160, 160);
+    const canvas = document.getElementById('scratchCanvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const coin = document.getElementById('scratch-coin');
 
-    const start = (e) => { if(isDone) return; isActive = true; coin.style.display='block'; scratch(e); };
-    const end = () => { isActive = false; sfx.pause(); coin.style.display='none'; };
-    canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); start(e); }, {passive:false});
-    canvas.addEventListener('touchmove', (e)=>{ e.preventDefault(); scratch(e); }, {passive:false});
+    // Draw the silver foil
+    ctx.fillStyle = '#C0C0C0';
+    ctx.fillRect(0, 0, 320, 320);
+
+    const start = (e) => {
+        if (isDone) return;
+        isActive = true;
+        coin.style.display = 'block';
+        scratch(e);
+    };
+
+    const end = () => {
+        isActive = false;
+        coin.style.display = 'none';
+        if (sfx) sfx.pause();
+    };
+
+    // --- LAPTOP (MOUSE) LISTENERS ---
+    canvas.addEventListener('mousedown', start);
+    window.addEventListener('mouseup', end);
+    canvas.addEventListener('mousemove', (e) => {
+        if (isActive) scratch(e);
+    });
+
+    // --- MOBILE (TOUCH) LISTENERS ---
+    // e.preventDefault() is critical here to stop the page from scrolling while scratching
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); start(e); }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); scratch(e); }, { passive: false });
     window.addEventListener('touchend', end);
 }
 
@@ -93,7 +117,7 @@ function scratch(e) {
 
     const rect = canvas.getBoundingClientRect();
     
-    // Logic to pick the right coordinates based on device
+    // Pick coordinates from Touch or Mouse
     let clientX, clientY;
     if (e.touches && e.touches.length > 0) {
         clientX = e.touches[0].clientX;
@@ -103,22 +127,26 @@ function scratch(e) {
         clientY = e.clientY;
     }
 
+    // Calculate position relative to the silver box
     const x = clientX - rect.left;
     const y = clientY - rect.top;
 
-    // Move the coin graphic to the pointer/finger
+    // Move the visual coin cursor
     coin.style.left = `${clientX}px`;
     coin.style.top = `${clientY}px`;
 
-    // The Erasing Logic
+    // Play scratch sound
+    if (sfx && sfx.paused) sfx.play().catch(() => {});
+
+    // THE ERASE ACTION
     ctx.globalCompositeOperation = 'destination-out';
     ctx.beginPath();
     ctx.arc(x, y, 35, 0, Math.PI * 2);
     ctx.fill();
     
-    // Performance: Only check win progress every 10th movement
+    // Check if user is finished every few movements
     scratchTicks++;
-    if (scratchTicks % 10 === 0) checkProgress();
+    if (scratchTicks % 10 === 0) checkProgress(ctx);
 }
 async function finalize() {
     if (isDone) return;
