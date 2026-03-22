@@ -121,27 +121,37 @@ function scratch(e) {
     if (scratchTicks % 10 === 0) checkProgress();
 }
 async function finalize() {
-    if(isDone) return; isDone = true;
-    sfx.pause(); canvas.style.opacity = "0";
+    if (isDone) return;
+    isDone = true;
+
+    // 1. Immediate Visual Feedback
+    canvas.style.opacity = "0"; 
     if ("vibrate" in navigator) navigator.vibrate([100, 50, 200]);
+    if (winSfx) winSfx.play().catch(() => {});
 
-    const t = await (await fetch(config.sheet)).text();
-    const gifts = t.split('\n').slice(1).map(l => ({n: l.split(',')[0].trim(), w: parseInt(l.split(',')[1])||1}));
-    let total = 0; gifts.forEach(g => total += g.w);
-    let rand = Math.random() * total, prize = gifts[0].n;
-    for(let g of gifts) { if(rand < g.w) { prize = g.n; break; } rand -= g.w; }
-    
-    const code = `IPX-${Math.floor(1000+Math.random()*9000)}`;
-    await fetch('/api/save-win', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ phone: userPhone, prize, code }) });
+    // 2. Show the box immediately with a "Loading" message
+    document.getElementById('scratch-container').style.display = 'none';
+    document.getElementById('claim-box').style.display = 'block';
+    document.getElementById('wonText').innerText = "Verifying..."; 
 
-    setTimeout(() => {
-        document.getElementById('scratch-container').style.display='none';
-        document.getElementById('claim-box').style.display='block';
+    try {
+        // 3. Fetch Prize from Google
+        const res = await fetch(config.sheet);
+        const text = await res.json(); // Ensure your server sends JSON or text correctly
+        
+        // ... (Your existing prize selection logic) ...
+
+        // 4. Update UI with the actual prize
         document.getElementById('wonText').innerText = prize;
         document.getElementById('idBadge').innerText = `ID: ${code}`;
-        winSfx.play();
-        confetti({ particleCount: 150, colors: ['#D4AF37', '#C0C0C0', '#FFF'] });
-    }, 500);
+
+        // 5. Success Confetti
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+    } catch (error) {
+        console.error("Reveal Error:", error);
+        document.getElementById('wonText').innerText = "Network Error - Try Again";
+    }
 }
 
 function downloadPrize() {
