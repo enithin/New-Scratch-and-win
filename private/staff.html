@@ -73,11 +73,24 @@
             <button class="btn btn-gold" onclick="check()">Verify</button>
         </div>
 
-        <div id="res">
-            <div id="pTit" style="font-size: 1.2rem; font-weight: 700; margin-bottom: 15px;"></div>
-            <button id="redBtn" class="btn" style="background:#fff; color:#000; width: 100%;" onclick="redeem()">Mark as Claimed ✅</button>
+        <div id="res" style="display: none; margin-top: 20px; text-align: left; border-radius: 15px; overflow: hidden;">
+    <div id="statusHeader" style="padding: 15px; text-align: center; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;"></div>
+    
+    <div style="background: #222; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span style="color: #888; font-size: 0.8rem;">CUSTOMER MOBILE</span>
+            <span id="resPhone" style="font-weight: 600;">--</span>
+        </div>
+        <div style="margin-bottom: 20px;">
+            <span style="color: #888; font-size: 0.8rem;">UNCLAIMED PRIZE</span>
+            <div id="pTit" style="font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-top: 5px;"></div>
+        </div>
+
+        <div id="actionArea">
+             <button id="redBtn" class="btn btn-gold" style="width: 100%; height: 50px;" onclick="redeem()">CONFIRM & MARK AS CLAIMED</button>
         </div>
     </div>
+</div>
 
     <div class="history-section">
         <h2>Recent Activity</h2>
