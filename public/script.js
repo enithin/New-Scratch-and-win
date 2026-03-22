@@ -211,6 +211,29 @@ async function finalize() {
         console.error("Reveal Error:", err);
         document.getElementById('wonText').innerText = "Fetch Error - Ask Staff";
     }
+    // Inside your finalize() function, right after the prize is selected:
+const winData = {
+    phone: userPhone,
+    prize: selectedPrize,
+    code: winID,
+    timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+};
+
+console.log("Attempting to save win:", winData);
+
+// SEND TO SERVER
+fetch('/api/save-win', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(winData)
+})
+.then(response => {
+    if (!response.ok) throw new Error('Server side save failed');
+    console.log("✅ Sheet updated successfully!");
+})
+.catch(err => {
+    console.error("❌ Google Sheet Sync Error:", err);
+});
 }
 function downloadPrize() {
     html2canvas(document.querySelector("#capture-area")).then(c => {
