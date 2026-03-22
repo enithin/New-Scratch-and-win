@@ -118,6 +118,17 @@ function scratch(e) {
     coin.style.left = `${clientX}px`;
     coin.style.top = `${clientY}px`;
 
+    // 3. THE VIBRATION LOGIC
+    // We only vibrate every 5th "tick" so the phone doesn't crash 
+    // and the sensation feels like a "gritty" scratch.
+    scratchTicks++; 
+    if (scratchTicks % 5 === 0) {
+        if ("vibrate" in navigator) {
+            // Short 10ms pulse for a "clicky" feel
+            navigator.vibrate(10); 
+        }
+    }
+
     // Play scratch sound
     if (sfx && sfx.paused) sfx.play().catch(() => {});
 
