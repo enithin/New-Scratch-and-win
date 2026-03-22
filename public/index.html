@@ -8,68 +8,109 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        .gold-gradient { background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); }
-        .glass-card { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
-        #scratch-container { position: relative; width: 320px; height: 180px; margin: 0 auto; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.2)); }
-        canvas { position: absolute; top: 0; left: 0; z-index: 20; cursor: crosshair; touch-action: none; border-radius: 20px; }
-        .prize-underlay { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; border-radius: 20px; z-index: 10; border: 2px solid #f8fafc; }
+        body { background: radial-gradient(circle at center, #1e293b, #0f172a); min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow-x: hidden; }
+        .vibrant-card { background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); border: 2px solid #eab308; box-shadow: 0 0 30px rgba(234, 179, 8, 0.3); }
+        
+        #scratch-container { position: relative; width: 320px; height: 180px; margin: 0 auto; border-radius: 20px; overflow: hidden; }
+        canvas { position: absolute; top: 0; left: 0; z-index: 20; cursor: crosshair; touch-action: none; }
+        .prize-underlay { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; z-index: 10; border: 1px solid #e2e8f0; }
+
+        /* Security Hologram Animation */
+        .hologram-badge {
+            position: absolute; bottom: 10px; right: 10px; width: 45px; height: 45px;
+            background: linear-gradient(135deg, #ff00ff, #00ffff, #ffff00); background-size: 300% 300%;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 7px; font-weight: 900; color: white; text-transform: uppercase;
+            animation: holo-spin 3s infinite linear; border: 2px solid rgba(255,255,255,0.6); z-index: 15;
+        }
+        @keyframes holo-spin { 0% { background-position: 0% 50%; transform: rotate(0deg); } 100% { background-position: 100% 50%; transform: rotate(360deg); } }
+
+        /* Premium Download Template Styling */
+        #voucher-capture-area {
+            width: 350px; background: #ffffff; border: 10px solid #1e293b; padding: 25px; text-align: center;
+            border-image: linear-gradient(to bottom right, #bf953f, #fcf6ba, #b38728) 1;
+        }
+        .off-screen { position: absolute; left: -9999px; }
     </style>
 </head>
-<body class="bg-slate-900 min-h-screen flex flex-col items-center justify-center p-4 font-sans text-slate-800">
+<body class="p-4">
 
     <audio id="scratch-sound" src="scratch.mp3" preload="auto" loop></audio>
 
-    <div class="mb-6 text-center">
-        <div class="w-20 h-20 bg-white rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-2xl border-2 border-yellow-500 overflow-hidden">
-            <img src="logo.png" alt="Logo" class="w-16" onerror="this.src='https://via.placeholder.com/150?text=iPromax'">
+    <div id="main-card" class="vibrant-card rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl transition-all">
+        
+        <div id="content-area">
+            <div id="step-1">
+                <h1 class="text-2xl font-black text-slate-800 mb-4 text-center">Exclusive Gift 🎁</h1>
+                <div class="bg-slate-100 p-4 rounded-2xl mb-6 text-[11px] leading-relaxed text-slate-600 border border-slate-200">
+                    <p class="font-bold text-slate-800 mb-1 tracking-tight">TERMS OF REDEMPTION:</p>
+                    <ul class="space-y-1">
+                        <li>• Valid for 30 days from reveal.</li>
+                        <li>• Must present Voucher ID at counter.</li>
+                        <li>• Verified by iPromax/KochiFix staff.</li>
+                        <li>• One claim per Google Review.</li>
+                    </ul>
+                </div>
+                <button onclick="nextStep(2)" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-black transition-all shadow-xl active:scale-95">
+                    I AGREE & START
+                </button>
+            </div>
+
+            <div id="step-2" class="hidden text-center">
+                <div class="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">Unlock Your Prize</h2>
+                <p class="text-sm text-slate-500 mb-8">Share your experience on Google to enable the scratch card.</p>
+                
+                <a id="review-link" href="#" target="_blank" onclick="document.getElementById('unlock-btn').classList.remove('hidden')" 
+                   class="block w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg mb-4">
+                   Write a Review
+                </a>
+                
+                <button id="unlock-btn" onclick="nextStep(3)" class="hidden w-full bg-green-500 text-white py-4 rounded-2xl font-black animate-bounce shadow-xl">
+                   REVEAL MY CARD
+                </button>
+            </div>
+
+            <div id="step-3" class="hidden">
+                <div id="scratch-container" class="mb-6 shadow-lg border-2 border-white">
+                    <div class="prize-underlay">
+                        <div class="hologram-badge"><span>Genuine</span></div>
+                        <div class="text-center">
+                            <span class="text-[10px] text-slate-400 font-black tracking-widest uppercase">Official Reward</span>
+                            <h3 id="prize-text" class="text-2xl font-black text-slate-900 leading-tight my-1">...</h3>
+                            <p id="v-id-display" class="text-[9px] text-blue-600 font-mono font-bold"></p>
+                        </div>
+                    </div>
+                    <canvas id="scratch-canvas" width="320" height="180"></canvas>
+                </div>
+                
+                <div id="win-actions" class="hidden space-y-3 opacity-0 transform translate-y-4 transition-all duration-700">
+                    <button onclick="saveImage()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg">
+                        📥 DOWNLOAD VOUCHER
+                    </button>
+                    <button onclick="shareWA()" class="w-full bg-[#25D366] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg">
+                        CLAIM ON WHATSAPP
+                    </button>
+                </div>
+                <div id="scratch-instruction" class="text-center text-xs text-slate-400 font-medium italic animate-pulse">
+                    Rub your finger to reveal!
+                </div>
+            </div>
         </div>
-        <h1 class="text-white text-2xl font-black tracking-widest uppercase">Member Rewards</h1>
     </div>
 
-    <div id="main-card" class="glass-card rounded-[2.5rem] shadow-2xl max-w-sm w-full overflow-hidden border-t-4 border-yellow-400">
-        
-        <div id="step-1" class="p-8">
-            <h2 class="text-xl font-bold mb-2">Claim Your Gift</h2>
-            <p class="text-xs text-gray-500 mb-6 uppercase tracking-wider">Enter details to start</p>
-            
-            <input type="text" id="userName" placeholder="Your Name" class="w-full p-4 mb-3 rounded-xl bg-gray-100 border-none outline-none focus:ring-2 focus:ring-yellow-500">
-            <input type="tel" id="userPhone" placeholder="WhatsApp Number" class="w-full p-4 mb-6 rounded-xl bg-gray-100 border-none outline-none focus:ring-2 focus:ring-yellow-500">
-            
-            <button onclick="nextStep(2)" class="w-full gold-gradient py-4 rounded-xl font-black text-slate-900 shadow-xl active:scale-95 transition-all">
-                NEXT STEP
-            </button>
-        </div>
-
-        <div id="step-2" class="hidden p-8 text-center">
-            <h2 class="text-xl font-bold mb-2">Unlock Scratch Card</h2>
-            <p class="text-sm text-gray-500 mb-8">Post a quick review to activate your reward.</p>
-            
-            <a id="review-link" href="#" target="_blank" 
-               onclick="document.getElementById('unlock-btn').classList.remove('hidden')" 
-               class="block w-full bg-slate-900 text-white py-4 rounded-xl font-bold mb-4">
-               1. Write Google Review ★
-            </a>
-            
-            <button id="unlock-btn" onclick="nextStep(3)" class="hidden w-full bg-green-600 text-white py-4 rounded-xl font-bold animate-pulse">
-               2. Reveal Scratch Card
-            </button>
-        </div>
-
-        <div id="step-3" class="hidden p-8 pb-10 text-center">
-            <h2 class="text-xl font-bold mb-1">Scratch to Win</h2>
-            <p class="text-[10px] text-gray-400 mb-6 uppercase tracking-[0.2em]">Rub 50% to claim prize</p>
-            
-            <div id="scratch-container">
-                <div class="prize-underlay">
-                    <span id="v-id-display" class="absolute top-2 right-2 text-[8px] font-bold text-gray-300"></span>
-                    <span class="text-[10px] text-gray-400 uppercase font-black tracking-widest">Official Prize</span>
-                    <span id="prize-text" class="text-2xl font-black text-slate-900 px-4">...</span>
-                </div>
-                <canvas id="scratch-canvas" width="320" height="180"></canvas>
-            </div>
-            
-            <div id="status-box" class="mt-8">
-                <div class="text-xs text-gray-400 italic">Use your finger to reveal the prize</div>
+    <div id="final-download-template" class="off-screen">
+        <div id="voucher-capture-area">
+            <div style="position: absolute; top: 15px; right: 15px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid #d4af37; font-size: 5px; display: flex; align-items: center; justify-content: center; color: #d4af37; font-weight: bold;">ORIGINAL SEAL</div>
+            <h2 style="font-size: 14px; font-weight: 900; color: #1e293b; margin-bottom: 5px;">iPromax / KochiFix</h2>
+            <p style="font-size: 8px; color: #94a3b8; letter-spacing: 2px; text-transform: uppercase;">Gift Certificate</p>
+            <div style="height: 1px; background: #eee; margin: 15px 0;"></div>
+            <h1 id="download-prize-text" style="font-size: 24px; font-weight: 900; color: #0f172a; margin: 10px 0;">PRIZE</h1>
+            <p id="download-v-id" style="font-family: monospace; font-size: 11px; color: #2563eb; font-weight: bold; margin-bottom: 5px;"></p>
+            <p style="font-size: 10px; color: #dc2626; font-weight: 900;">EXPIRY: <span id="download-expiry"></span></p>
+            <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 10px; font-size: 7px; color: #64748b; line-height: 1.4;">
+                <strong>KOCHI:</strong> Stadium Round, Kaloor | <strong>TRIVANDRUM:</strong> Kesavadasapuram<br>
+                Valid only after physical verification at the service center.
             </div>
         </div>
     </div>
@@ -77,58 +118,54 @@
     <script>
         let isSaved = false;
         let businessData = { whatsapp: '', placeId: '' };
-        const scratchSound = document.getElementById('scratch-sound');
-        const prizes = ["Flat 10% Off", "Free Tempered Glass", "Rs. 500 Discount", "Battery Service Offer"];
+        const prizes = ["Flat 10% Off", "Free Tempered Glass", "Rs. 500 Discount", "Service 20% Off", "Free Diagnostics"];
         const selectedPrize = prizes[Math.floor(Math.random() * prizes.length)];
-        const uniqueID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
+        const uniqueID = `IPX-${Math.floor(10000 + Math.random() * 90000)}`;
 
-        // Load Business Config from Render Env via API
         async function loadConfig() {
             try {
                 const res = await fetch('/api/business-info');
                 businessData = await res.json();
                 document.getElementById('review-link').href = `https://search.google.com/local/writereview?placeid=${businessData.placeId}`;
-            } catch (e) { console.error("Config load failed"); }
+            } catch (e) { console.error("Config missing"); }
         }
         window.onload = loadConfig;
 
         function nextStep(step) {
-            document.querySelectorAll('#main-card > div').forEach(div => div.classList.add('hidden'));
-            document.getElementById(`step-${step}`).classList.remove('hidden');
+            document.getElementById('step-1').classList.add('hidden');
+            document.getElementById('step-2').classList.add('hidden');
+            document.getElementById('step-3').classList.remove('hidden');
             if(step === 3) initScratch();
         }
 
         function initScratch() {
             const canvas = document.getElementById('scratch-canvas');
             const ctx = canvas.getContext('2d');
+            const sound = document.getElementById('scratch-sound');
             document.getElementById('prize-text').innerText = selectedPrize;
             document.getElementById('v-id-display').innerText = `ID: ${uniqueID}`;
 
             ctx.fillStyle = '#d4af37'; 
             ctx.fillRect(0, 0, 320, 180);
             ctx.fillStyle = '#926a0a';
-            ctx.font = 'bold 16px sans-serif';
+            ctx.font = 'bold 18px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('SCRATCH HERE', 160, 100);
+            ctx.fillText('SCRATCH TO REVEAL!', 160, 100);
 
-            const handleScratch = (e) => {
+            const scratch = (e) => {
                 const rect = canvas.getBoundingClientRect();
                 const x = (e.clientX || (e.touches ? e.touches[0].clientX : 0)) - rect.left;
                 const y = (e.clientY || (e.touches ? e.touches[0].clientY : 0)) - rect.top;
-
-                if (window.navigator.vibrate) window.navigator.vibrate(10);
-                if (scratchSound.paused) scratchSound.play().catch(() => {});
-
+                if (window.navigator.vibrate) window.navigator.vibrate(12);
+                if (sound.paused) sound.play().catch(() => {});
                 ctx.globalCompositeOperation = 'destination-out';
-                ctx.beginPath();
-                ctx.arc(x, y, 25, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(x, y, 28, 0, Math.PI * 2); ctx.fill();
                 checkProgress(canvas);
             };
 
-            const stopSound = () => { scratchSound.pause(); scratchSound.currentTime = 0; };
-            canvas.addEventListener('mousemove', (e) => e.buttons === 1 && handleScratch(e));
-            canvas.addEventListener('touchmove', (e) => handleScratch(e));
+            const stopSound = () => { sound.pause(); sound.currentTime = 0; };
+            canvas.addEventListener('mousemove', (e) => e.buttons === 1 && scratch(e));
+            canvas.addEventListener('touchmove', (e) => scratch(e));
             canvas.addEventListener('touchend', stopSound);
             canvas.addEventListener('mouseup', stopSound);
         }
@@ -142,31 +179,24 @@
         }
 
         async function handleWin() {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#FFD700', '#FFFFFF'] });
-            const exp = new Date(); exp.setDate(exp.getDate() + 30);
-            const expStr = exp.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#fbbf24', '#ffffff'] });
+            const expStr = new Date(Date.now() + 2592000000).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            
+            document.getElementById('download-prize-text').innerText = selectedPrize.toUpperCase();
+            document.getElementById('download-v-id').innerText = `ID: ${uniqueID}`;
+            document.getElementById('download-expiry').innerText = expStr;
 
-            const statusBox = document.getElementById('status-box');
-            statusBox.innerHTML = `
-                <div id="voucher-capture" class="bg-white p-6 rounded-2xl border-2 border-yellow-500 mb-6 text-center shadow-inner">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Prize Voucher</p>
-                    <h3 class="text-2xl font-black text-slate-900 my-2">${selectedPrize}</h3>
-                    <div class="h-px bg-gray-100 my-3"></div>
-                    <p class="text-[10px] text-red-500 font-bold uppercase">Expires: ${expStr}</p>
-                    <p class="text-[8px] text-gray-400 mt-1 italic">ID: ${uniqueID}</p>
-                </div>
-                <div class="grid grid-cols-1 gap-2">
-                    <button onclick="saveImage()" class="bg-slate-900 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">📥 Save to Gallery</button>
-                    <button onclick="shareWA('${expStr}')" class="bg-[#25D366] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">Claim on WhatsApp</button>
-                </div>
-            `;
+            document.getElementById('scratch-instruction').classList.add('hidden');
+            const actions = document.getElementById('win-actions');
+            actions.classList.remove('hidden');
+            setTimeout(() => actions.classList.remove('opacity-0', 'translate-y-4'), 100);
 
-            await fetch('/api/save-winner', {
+            fetch('/api/save-winner', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    name: document.getElementById('userName').value,
-                    phone: document.getElementById('userPhone').value,
+                    name: "Customer",
+                    phone: "N/A",
                     prize: selectedPrize,
                     voucherId: uniqueID,
                     expiry: expStr
@@ -175,15 +205,17 @@
         }
 
         function saveImage() {
-            html2canvas(document.getElementById('voucher-capture')).then(canvas => {
+            const temp = document.getElementById('final-download-template');
+            temp.classList.remove('off-screen');
+            html2canvas(document.getElementById('voucher-capture-area'), { scale: 2 }).then(canvas => {
                 const a = document.createElement('a'); a.download = `Voucher-${uniqueID}.png`;
-                a.href = canvas.toDataURL(); a.click();
+                a.href = canvas.toDataURL("image/png"); a.click();
+                temp.classList.add('off-screen');
             });
         }
 
-        function shareWA(exp) {
-            const name = document.getElementById('userName').value;
-            const msg = `Hi! I'm ${name}. I won *${selectedPrize}*! \nID: *${uniqueID}* \nExpires: ${exp}`;
+        function shareWA() {
+            const msg = `Hi! I won *${selectedPrize}* at iPromax! \nVoucher ID: *${uniqueID}*`;
             window.open(`https://wa.me/${businessData.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
         }
     </script>
