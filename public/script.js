@@ -12,6 +12,27 @@ function unlockReview() {
     isUnlocked = true;
 }
 
+// Function to Open/Close Modal
+function toggleModal(show) {
+    const modal = document.getElementById('tcModal');
+    if (show) {
+        modal.style.display = 'flex';
+    } else {
+        modal.style.display = 'none';
+    }
+}
+
+// Function to handle the Review Gate
+function unlockScratch() {
+    window.open("https://search.google.com/local/writereview?placeid=ChIJLytlO64NCDsRVhE0w4DRZTg&rate=5", "_blank");
+    
+    // Switch to Agree & Start button
+    document.getElementById('review-gate').style.display = 'none';
+    document.getElementById('scratch-gate').style.display = 'block';
+    
+    isUnlocked = true;
+    if ("vibrate" in navigator) navigator.vibrate(50);
+}
 async function launch() {
     userPhone = document.getElementById('phone').value.trim();
     if (userPhone.length !== 10) return alert("Enter 10-digit mobile");
