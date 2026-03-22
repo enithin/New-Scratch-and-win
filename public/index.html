@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP Scratch & Win | Exclusive Rewards</title>
+    <title>VIP Rewards | iPromax & KochiFix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         .gold-gradient { background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); }
         .glass-card { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
-        #scratch-container { position: relative; width: 320px; height: 180px; margin: 0 auto; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.15)); }
+        #scratch-container { position: relative; width: 320px; height: 180px; margin: 0 auto; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.2)); }
         canvas { position: absolute; top: 0; left: 0; z-index: 20; cursor: crosshair; touch-action: none; border-radius: 20px; }
         .prize-underlay { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; border-radius: 20px; z-index: 10; border: 2px solid #f8fafc; }
     </style>
@@ -21,7 +21,7 @@
 
     <div class="mb-6 text-center">
         <div class="w-20 h-20 bg-white rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-2xl border-2 border-yellow-500 overflow-hidden">
-            <img src="logo.png" alt="Logo" class="w-16">
+            <img src="logo.png" alt="Logo" class="w-16" onerror="this.src='https://via.placeholder.com/150?text=iPromax'">
         </div>
         <h1 class="text-white text-2xl font-black tracking-widest uppercase">Member Rewards</h1>
     </div>
@@ -30,45 +30,38 @@
         
         <div id="step-1" class="p-8">
             <h2 class="text-xl font-bold mb-2">Claim Your Gift</h2>
-            <p class="text-xs text-gray-500 mb-6 uppercase tracking-wider">Accept terms to begin</p>
+            <p class="text-xs text-gray-500 mb-6 uppercase tracking-wider">Enter details to start</p>
             
-            <div class="bg-gray-50 p-3 rounded-xl mb-6 text-[11px] text-gray-500 h-24 overflow-y-auto border">
-                <p>• Must be 18+ to participate.</p>
-                <p>• One prize per Google Review verification.</p>
-                <p>• Redeemable at Kochi/Trivandrum centers.</p>
-                <p>• Voucher valid for 30 days from win date.</p>
-            </div>
-
-            <input type="text" id="userName" placeholder="Your Full Name" class="w-full p-4 mb-3 rounded-xl bg-gray-100 border-none outline-none focus:ring-2 focus:ring-yellow-500">
+            <input type="text" id="userName" placeholder="Your Name" class="w-full p-4 mb-3 rounded-xl bg-gray-100 border-none outline-none focus:ring-2 focus:ring-yellow-500">
             <input type="tel" id="userPhone" placeholder="WhatsApp Number" class="w-full p-4 mb-6 rounded-xl bg-gray-100 border-none outline-none focus:ring-2 focus:ring-yellow-500">
             
-            <button onclick="nextStep(2)" class="w-full gold-gradient py-4 rounded-xl font-black text-slate-900 shadow-xl hover:brightness-105 transition active:scale-95">
-                START SCRATCHING
+            <button onclick="nextStep(2)" class="w-full gold-gradient py-4 rounded-xl font-black text-slate-900 shadow-xl active:scale-95 transition-all">
+                NEXT STEP
             </button>
         </div>
 
         <div id="step-2" class="hidden p-8 text-center">
-            <h2 class="text-xl font-bold mb-2">Unlock Your Card</h2>
-            <p class="text-sm text-gray-500 mb-8">Post a review on Google to activate the scratch surface.</p>
+            <h2 class="text-xl font-bold mb-2">Unlock Scratch Card</h2>
+            <p class="text-sm text-gray-500 mb-8">Post a quick review to activate your reward.</p>
             
-            <a href="https://search.google.com/local/writereview?placeid=ChIJ78p9pDeuEmsR173v6vfegQE="_blank" 
+            <a id="review-link" href="#" target="_blank" 
                onclick="document.getElementById('unlock-btn').classList.remove('hidden')" 
-               class="block w-full bg-slate-900 text-white py-4 rounded-xl font-bold mb-4 shadow-lg">
+               class="block w-full bg-slate-900 text-white py-4 rounded-xl font-bold mb-4">
                1. Write Google Review ★
             </a>
             
             <button id="unlock-btn" onclick="nextStep(3)" class="hidden w-full bg-green-600 text-white py-4 rounded-xl font-bold animate-pulse">
-               2. Reveal My Card
+               2. Reveal Scratch Card
             </button>
         </div>
 
         <div id="step-3" class="hidden p-8 pb-10 text-center">
-            <h2 class="text-xl font-bold mb-1">Reveal Your Prize</h2>
-            <p class="text-[10px] text-gray-400 mb-6 uppercase tracking-[0.2em]">Scratch over 50% to claim</p>
+            <h2 class="text-xl font-bold mb-1">Scratch to Win</h2>
+            <p class="text-[10px] text-gray-400 mb-6 uppercase tracking-[0.2em]">Rub 50% to claim prize</p>
             
             <div id="scratch-container">
                 <div class="prize-underlay">
-                    <span id="voucher-id-display" class="absolute top-2 right-2 text-[8px] font-bold text-gray-300"></span>
+                    <span id="v-id-display" class="absolute top-2 right-2 text-[8px] font-bold text-gray-300"></span>
                     <span class="text-[10px] text-gray-400 uppercase font-black tracking-widest">Official Prize</span>
                     <span id="prize-text" class="text-2xl font-black text-slate-900 px-4">...</span>
                 </div>
@@ -76,17 +69,28 @@
             </div>
             
             <div id="status-box" class="mt-8">
-                <div class="text-xs text-gray-400 italic">Rub with your finger to scratch</div>
+                <div class="text-xs text-gray-400 italic">Use your finger to reveal the prize</div>
             </div>
         </div>
     </div>
 
     <script>
         let isSaved = false;
+        let businessData = { whatsapp: '', placeId: '' };
         const scratchSound = document.getElementById('scratch-sound');
-        const prizes = ["Flat 10% Off", "Free Tempered Glass", "Rs. 500 Discount", "Service 20% Off"];
+        const prizes = ["Flat 10% Off", "Free Tempered Glass", "Rs. 500 Discount", "Battery Service Offer"];
         const selectedPrize = prizes[Math.floor(Math.random() * prizes.length)];
         const uniqueID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
+
+        // Load Business Config from Render Env via API
+        async function loadConfig() {
+            try {
+                const res = await fetch('/api/business-info');
+                businessData = await res.json();
+                document.getElementById('review-link').href = `https://search.google.com/local/writereview?placeid=${businessData.placeId}`;
+            } catch (e) { console.error("Config load failed"); }
+        }
+        window.onload = loadConfig;
 
         function nextStep(step) {
             document.querySelectorAll('#main-card > div').forEach(div => div.classList.add('hidden'));
@@ -98,9 +102,8 @@
             const canvas = document.getElementById('scratch-canvas');
             const ctx = canvas.getContext('2d');
             document.getElementById('prize-text').innerText = selectedPrize;
-            document.getElementById('voucher-id-display').innerText = `ID: ${uniqueID}`;
+            document.getElementById('v-id-display').innerText = `ID: ${uniqueID}`;
 
-            // Create Gold Surface
             ctx.fillStyle = '#d4af37'; 
             ctx.fillRect(0, 0, 320, 180);
             ctx.fillStyle = '#926a0a';
@@ -120,12 +123,10 @@
                 ctx.beginPath();
                 ctx.arc(x, y, 25, 0, Math.PI * 2);
                 ctx.fill();
-                
                 checkProgress(canvas);
             };
 
             const stopSound = () => { scratchSound.pause(); scratchSound.currentTime = 0; };
-
             canvas.addEventListener('mousemove', (e) => e.buttons === 1 && handleScratch(e));
             canvas.addEventListener('touchmove', (e) => handleScratch(e));
             canvas.addEventListener('touchend', stopSound);
@@ -137,19 +138,13 @@
             const pixels = ctx.getImageData(0, 0, 320, 180).data;
             let clear = 0;
             for (let i = 3; i < pixels.length; i += 4) { if (pixels[i] === 0) clear++; }
-            
-            if ((clear / (320 * 180)) > 0.5 && !isSaved) {
-                isSaved = true;
-                handleWin();
-            }
+            if ((clear / (320 * 180)) > 0.5 && !isSaved) { isSaved = true; handleWin(); }
         }
 
         async function handleWin() {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#FFD700', '#FFFFFF'] });
-            
-            const expiry = new Date();
-            expiry.setDate(expiry.getDate() + 30);
-            const expStr = expiry.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            const exp = new Date(); exp.setDate(exp.getDate() + 30);
+            const expStr = exp.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
             const statusBox = document.getElementById('status-box');
             statusBox.innerHTML = `
@@ -158,15 +153,14 @@
                     <h3 class="text-2xl font-black text-slate-900 my-2">${selectedPrize}</h3>
                     <div class="h-px bg-gray-100 my-3"></div>
                     <p class="text-[10px] text-red-500 font-bold uppercase">Expires: ${expStr}</p>
-                    <p class="text-[8px] text-gray-400 mt-1">Voucher ID: ${uniqueID}</p>
+                    <p class="text-[8px] text-gray-400 mt-1 italic">ID: ${uniqueID}</p>
                 </div>
                 <div class="grid grid-cols-1 gap-2">
                     <button onclick="saveImage()" class="bg-slate-900 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">📥 Save to Gallery</button>
-                    <button onclick="shareWA('${expStr}')" class="bg-[#25D366] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg">Claim on WhatsApp</button>
+                    <button onclick="shareWA('${expStr}')" class="bg-[#25D366] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">Claim on WhatsApp</button>
                 </div>
             `;
 
-            // POST to your Render API
             await fetch('/api/save-winner', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -182,17 +176,15 @@
 
         function saveImage() {
             html2canvas(document.getElementById('voucher-capture')).then(canvas => {
-                const a = document.createElement('a');
-                a.download = `Voucher-${uniqueID}.png`;
-                a.href = canvas.toDataURL();
-                a.click();
+                const a = document.createElement('a'); a.download = `Voucher-${uniqueID}.png`;
+                a.href = canvas.toDataURL(); a.click();
             });
         }
 
         function shareWA(exp) {
             const name = document.getElementById('userName').value;
-            const msg = `Hi! I'm ${name}. I won *${selectedPrize}*! \nVoucher ID: *${uniqueID}* \nExpires: ${exp}`;
-            window.open(`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(msg)}`, '_blank');
+            const msg = `Hi! I'm ${name}. I won *${selectedPrize}*! \nID: *${uniqueID}* \nExpires: ${exp}`;
+            window.open(`https://wa.me/${businessData.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
         }
     </script>
 </body>
