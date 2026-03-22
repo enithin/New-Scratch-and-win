@@ -3,204 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VIP Rewards | iPromax & KochiFix</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <title>iPromax Kochi | Scratch & Win</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background: radial-gradient(circle at center, #1e293b, #0f172a); min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow-x: hidden; }
-        .vibrant-card { background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); border: 2px solid #eab308; box-shadow: 0 0 30px rgba(234, 179, 8, 0.4); }
-        #scratch-container { position: relative; width: 320px; height: 180px; margin: 0 auto; border-radius: 20px; overflow: hidden; }
-        canvas { position: absolute; top: 0; left: 0; z-index: 20; cursor: crosshair; touch-action: none; }
-        .prize-underlay { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; z-index: 10; border: 1px solid #e2e8f0; }
+        :root { --gold: #D4AF37; --dark: #0f0f0f; }
+        body { background: var(--dark); color: white; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
+        
+        /* Coin UI */
+        #scratch-coin { position: fixed; width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #eee, #c0c0c0, #888); border: 2px solid #aaa; box-shadow: 2px 5px 15px rgba(0,0,0,0.5); z-index: 1000; pointer-events: none; display: none; transform: translate(-50%, -50%); }
 
-        /* Security Hologram */
-        .hologram-badge {
-            position: absolute; bottom: 10px; right: 10px; width: 45px; height: 45px;
-            background: linear-gradient(135deg, #ff00ff, #00ffff, #ffff00); background-size: 300% 300%;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 7px; font-weight: 900; color: white; text-transform: uppercase;
-            animation: holo-spin 3s infinite linear; border: 2px solid rgba(255,255,255,0.6); z-index: 15;
-        }
-        @keyframes holo-spin { 0% { background-position: 0% 50%; transform: rotate(0deg); } 100% { background-position: 100% 50%; transform: rotate(360deg); } }
+        /* Containers */
+        #login-box, #claim-box { background: #1a1a1a; padding: 30px; border-radius: 25px; border: 1px solid #333; width: 310px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        input { width: 90%; padding: 15px; border-radius: 12px; border: 1px solid var(--gold); background: #000; color: white; margin-bottom: 15px; text-align: center; font-size: 1.1rem; }
+        
+        #scratch-container { position: relative; width: 320px; height: 320px; border-radius: 20px; border: 2px solid var(--gold); overflow: hidden; display: none; }
+        canvas { position: absolute; top: 0; left: 0; z-index: 5; touch-action: none; transition: opacity 0.5s ease; }
 
-        /* HD Download Template */
-        #voucher-capture-area {
-            width: 350px; background: #ffffff; border: 10px solid #1e293b; padding: 25px; text-align: center;
-            border-image: linear-gradient(to bottom right, #bf953f, #fcf6ba, #b38728) 1;
-        }
-        .off-screen { position: absolute; left: -9999px; }
+        /* Prize Card */
+        #capture-area { background: linear-gradient(135deg, #1a1a1a 0%, #000 100%); padding: 35px 20px; border-radius: 25px; border: 2px solid var(--gold); position: relative; }
+        .vibrant-prize { font-size: 2.2rem; font-weight: 800; color: var(--gold); text-transform: uppercase; margin: 15px 0; }
+        
+        /* Buttons */
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 50px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        .btn-gold { background: linear-gradient(45deg, #D4AF37, #F2D388); color: black; }
+        .btn-blue { background: #4285F4; color: white; }
     </style>
 </head>
-<body class="p-4">
-    <audio id="scratch-sound" src="scratch.mp3" preload="auto" loop></audio>
-    <audio id="cheer-sound" src="cheer.mp3" preload="auto"></audio>
+<body>
+    <div id="scratch-coin"></div>
 
-    <div id="main-card" class="vibrant-card rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl transition-all">
-        
-        <div class="mb-6 text-center">
-            <img src="logo.png" alt="Company Logo" class="h-12 mx-auto mb-2" onerror="this.src='https://via.placeholder.com/150?text=iPromax'">
-            <h1 class="text-slate-800 text-xl font-black tracking-widest uppercase italic">Member Rewards</h1>
+    <div id="login-box">
+        <img src="logo.png" style="width:150px; margin-bottom:20px;">
+        <input type="tel" id="phone" placeholder="Enter Mobile Number" maxlength="10">
+        <button class="btn btn-gold" onclick="launch()">REVEAL GIFT</button>
+    </div>
+
+    <div id="scratch-container">
+        <div style="position:absolute; width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#444;">REVEALING...</div>
+        <canvas id="scratchCanvas" width="320" height="320"></canvas>
+    </div>
+
+    <div id="claim-box" style="display:none;">
+        <div id="capture-area">
+            <img src="logo.png" style="width: 80px; margin-bottom: 10px;">
+            <h2 id="wonText" class="vibrant-prize"></h2>
+            <div id="idBadge" style="font-family:monospace; color:#888;"></div>
+            <div style="font-size:0.6rem; color:#666; margin-top:15px;">iPromax Kochi Apple Service Centre</div>
         </div>
-
-        <div id="content-area">
-            <div id="step-1">
-                <div class="bg-slate-100 p-4 rounded-2xl mb-6 text-[10px] leading-relaxed text-slate-600 border border-slate-200">
-                    <p class="font-bold text-slate-800 mb-1 uppercase">Official Terms:</p>
-                    <ul class="space-y-1">
-                        <li>• Valid at Kochi (Kaloor) & Trivandrum (Kazhakootam).</li>
-                        <li>• Present unique Voucher ID for verification.</li>
-                        <li>• Valid for 30 days from reveal date.</li>
-                        <li>• One claim per verified Google Review.</li>
-                    </ul>
-                </div>
-                <button onclick="nextStep(2)" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg shadow-xl active:scale-95 transition-all">
-                    ACCEPT & START
-                </button>
-            </div>
-
-            <div id="step-2" class="hidden text-center">
-                <div class="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
-                <h2 class="text-xl font-bold text-slate-800 mb-2">Unlock Your Card</h2>
-                <p class="text-sm text-slate-500 mb-8">Please share your feedback on Google to enable the scratch area.</p>
-                <a id="review-link" href="#" target="_blank" onclick="document.getElementById('unlock-btn').classList.remove('hidden')" 
-                   class="block w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg mb-4">
-                   Post a Review
-                </a>
-                <button id="unlock-btn" onclick="nextStep(3)" class="hidden w-full bg-green-500 text-white py-4 rounded-2xl font-black animate-bounce">
-                   GO TO SCRATCH CARD
-                </button>
-            </div>
-
-            <div id="step-3" class="hidden">
-                <div id="scratch-container" class="mb-6 border-4 border-white shadow-xl">
-                    <div class="prize-underlay">
-                        <div class="hologram-badge"><span>Genuine</span></div>
-                        <div class="text-center p-4">
-                            <img src="logo.png" class="w-10 mx-auto mb-2 opacity-30" onerror="this.src='https://via.placeholder.com/100?text=LOGO'">
-                            <span class="text-[9px] text-slate-400 font-black tracking-widest uppercase">Verified Reward</span>
-                            <h3 id="prize-text" class="text-2xl font-black text-slate-900 leading-tight">...</h3>
-                            <p id="v-id-display" class="text-[9px] text-blue-600 font-mono font-bold"></p>
-                        </div>
-                    </div>
-                    <canvas id="scratch-canvas" width="320" height="180"></canvas>
-                </div>
-                
-                <div id="win-actions" class="hidden space-y-3">
-                    <button onclick="saveImage()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2">
-                        📥 DOWNLOAD HD VOUCHER
-                    </button>
-                    <button onclick="shareWA()" class="w-full bg-[#25D366] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2">
-                        CLAIM ON WHATSAPP
-                    </button>
-                </div>
-                <p id="instruction" class="text-center text-xs text-slate-400 font-medium italic animate-pulse">Use your finger to rub & reveal!</p>
-            </div>
+        <p id="lock-msg" style="font-size: 0.75rem; color: var(--gold); margin-top:10px;">⭐ Step 1: Post a review to unlock</p>
+        <button class="btn btn-blue" id="reviewBtn" onclick="review()">1. POST 5-STAR REVIEW ⭐</button>
+        <div id="unlocked-actions" style="display: none;">
+            <button class="btn" style="background:#444; color:white;" onclick="downloadPrize()">💾 SAVE TO PHOTOS</button>
+            <button class="btn" style="background:#25D366; color:white;" onclick="claim()">2. GET ON WHATSAPP ✅</button>
         </div>
     </div>
 
-    <div id="final-download-template" class="off-screen">
-        <div id="voucher-capture-area">
-            <div style="position: absolute; top: 15px; right: 15px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid #d4af37; font-size: 5px; display: flex; align-items: center; justify-content: center; color: #d4af37; font-weight: bold;">ORIGINAL SEAL</div>
-            <img src="logo.png" style="width: 80px; margin: 0 auto 10px; display: block;" onerror="this.src='https://via.placeholder.com/150?text=iPromax'">
-            <h2 style="font-size: 16px; font-weight: 900; color: #1e293b;">iPromax / KochiFix</h2>
-            <p style="font-size: 8px; color: #94a3b8; letter-spacing: 2px; text-transform: uppercase;">Official Gift Certificate</p>
-            <div style="height: 1px; background: #f1f5f9; margin: 15px 0;"></div>
-            <h1 id="dl-prize" style="font-size: 24px; font-weight: 900; color: #0f172a; margin: 10px 0;">PRIZE</h1>
-            <p id="dl-vid" style="font-family: monospace; font-size: 11px; color: #2563eb; font-weight: bold; margin-bottom: 5px;"></p>
-            <p style="font-size: 10px; color: #dc2626; font-weight: 900;">EXPIRY: <span id="dl-exp"></span></p>
-            <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 10px; font-size: 7px; color: #64748b; line-height: 1.4;">
-                <strong>KOCHI:</strong> Door No: 3107, 2nd Floor, Stadium Round, Kaloor<br>
-                <strong>TRIVANDRUM:</strong> G Nath Building, Kazhakootam (Kazhakootam Branch)
-            </div>
-        </div>
-    </div>
+    <audio id="sfx" src="scratch.mp3" loop></audio>
+    <audio id="winSfx" src="win.mp3"></audio>
 
-    <script>
-        let isSaved = false, bizData = {}, selectedPrize = "", uniqueID = "";
-        const snd = document.getElementById('scratch-sound'), cheer = document.getElementById('cheer-sound');
-
-        async function loadConfig() {
-            try {
-                const res = await fetch('/api/business-info'); bizData = await res.json();
-                document.getElementById('review-link').href = `https://search.google.com/local/writereview?placeid=${bizData.placeId}`;
-            } catch (e) { console.error("Config fail"); }
-        }
-        window.onload = loadConfig;
-
-        async function nextStep(step) {
-            if (step === 2) { 
-                snd.play().then(() => snd.pause()); cheer.play().then(() => cheer.pause()); 
-            }
-            if (step === 3) {
-                const res = await fetch('/api/get-winner'); 
-                const data = await res.json();
-                selectedPrize = data.prize; 
-                uniqueID = data.voucherId;
-                document.getElementById('prize-text').innerText = selectedPrize;
-                document.getElementById('v-id-display').innerText = `ID: ${uniqueID}`;
-                initScratch();
-            }
-            document.getElementById('step-1').classList.add('hidden');
-            document.getElementById('step-2').classList.add('hidden');
-            document.getElementById('step-3').classList.remove('hidden');
-        }
-
-        function initScratch() {
-            const canvas = document.getElementById('scratch-canvas'), ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#d4af37'; ctx.fillRect(0, 0, 320, 180);
-            ctx.fillStyle = '#926a0a'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('SCRATCH TO REVEAL!', 160, 100);
-
-            const scratch = (e) => {
-                const r = canvas.getBoundingClientRect(), x = (e.clientX || (e.touches ? e.touches[0].clientX : 0)) - r.left, y = (e.clientY || (e.touches ? e.touches[0].clientY : 0)) - r.top;
-                if (window.navigator.vibrate) window.navigator.vibrate(20);
-                if (snd.paused) snd.play().catch(() => {});
-                ctx.globalCompositeOperation = 'destination-out'; ctx.beginPath(); ctx.arc(x, y, 28, 0, Math.PI * 2); ctx.fill();
-                checkProgress(canvas);
-            };
-            canvas.addEventListener('mousemove', (e) => e.buttons === 1 && scratch(e));
-            canvas.addEventListener('touchmove', scratch);
-            canvas.addEventListener('touchend', () => { snd.pause(); snd.currentTime = 0; });
-        }
-
-        function checkProgress(canvas) {
-            const ctx = canvas.getContext('2d'), p = ctx.getImageData(0, 0, 320, 180).data;
-            let clear = 0; for (let i = 3; i < p.length; i += 4) { if (p[i] === 0) clear++; }
-            if ((clear / (320 * 180)) > 0.5 && !isSaved) { isSaved = true; handleWin(); }
-        }
-
-        function handleWin() {
-            cheer.play(); confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            if (window.navigator.vibrate) window.navigator.vibrate([100, 50, 200]);
-            
-            const expStr = new Date(Date.now() + 2592000000).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-            
-            document.getElementById('dl-prize').innerText = selectedPrize.toUpperCase();
-            document.getElementById('dl-vid').innerText = `ID: ${uniqueID}`;
-            document.getElementById('dl-exp').innerText = expStr;
-
-            document.getElementById('instruction').classList.add('hidden');
-            document.getElementById('win-actions').classList.remove('hidden');
-
-            fetch('/api/save-winner', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: "Guest", phone: "N/A", prize: selectedPrize, voucherId: uniqueID, expiry: expStr })
-            });
-        }
-
-        function saveImage() {
-            const temp = document.getElementById('final-download-template'); 
-            temp.classList.remove('off-screen');
-            html2canvas(document.getElementById('voucher-capture-area'), { scale: 2 }).then(canvas => {
-                const a = document.createElement('a'); a.download = `Voucher-${uniqueID}.png`;
-                a.href = canvas.toDataURL("image/png"); a.click();
-                temp.classList.add('off-screen');
-            });
-        }
-
-        function shareWA() {
-            const msg = `Hi! I won *${selectedPrize}* at iPromax! \nID: *${uniqueID}*`;
-            window.open(`https://wa.me/${bizData.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
