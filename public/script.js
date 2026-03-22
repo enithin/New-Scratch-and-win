@@ -249,6 +249,8 @@ function downloadPrize() {
         scale: 2, // Double the resolution for a crisp image
         logging: false,
         useCORS: true
+        x: -5, 
+        width: target.offsetWidth + 10
     }).then(canvas => {
         const link = document.createElement('a');
         link.download = `iPromax-Winner-${userPhone}.png`;
