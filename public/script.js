@@ -91,27 +91,6 @@ function init() {
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); scratch(e); }, { passive: false });
     window.addEventListener('touchend', end);
 }
-
-function checkProgress(ctx) {
-    const imageData = ctx.getImageData(0, 0, 320, 320);
-    const pixels = imageData.data;
-    let transparent = 0;
-
-    // Check every 4th pixel (Alpha channel)
-    for (let i = 3; i < pixels.length; i += 4) {
-        if (pixels[i] < 150) { // If pixel is mostly erased
-            transparent++;
-        }
-    }
-
-    const percent = transparent / (320 * 320);
-    
-    // REDUCE THRESHOLD: If 20% is scratched, reveal the prize.
-    // This feels much faster and "error-free" for the customer.
-    if (percent > 0.20 && !isDone) {
-        finalize();
-    }
-}
 function scratch(e) {
     if (isDone || !isActive) return;
 
@@ -148,40 +127,94 @@ function scratch(e) {
     scratchTicks++;
     if (scratchTicks % 10 === 0) checkProgress(ctx);
 }
+function checkProgress(ctx) {
+    // 1. Get the raw pixel data from the 320x320 canvas
+    const imageData = ctx.getImageData(0, 0, 320, 320);
+    const pixels = imageData.data;
+    let transparentCount = 0;
+
+    // 2. We check the 'Alpha' channel (every 4th value)
+    for (let i = 3; i < pixels.length; i += 4) {
+        // If the pixel is mostly erased (Alpha < 150), count it
+        if (pixels[i] < 150) {
+            transparentCount++;
+        }
+    }
+
+    // 3. Calculate the percentage
+    const percentScratched = transparentCount / (320 * 320);
+
+    // 4. TRIGGER: If more than 20% is cleared, reveal the prize
+    if (percentScratched > 0.20 && !isDone) {
+        finalize();
+    }
+}
+
 async function finalize() {
     if (isDone) return;
     isDone = true;
 
-    // 1. Immediate Visual Feedback
-    canvas.style.opacity = "0"; 
+    // A. Immediate Sensory Feedback
     if ("vibrate" in navigator) navigator.vibrate([100, 50, 200]);
+    canvas.style.opacity = "0"; // Smooth fade out the silver
+    if (sfx) sfx.pause();
     if (winSfx) winSfx.play().catch(() => {});
 
-    // 2. Show the box immediately with a "Loading" message
+    // B. Show the Card Immediately (Prevents "Blank Screen" feel)
     document.getElementById('scratch-container').style.display = 'none';
     document.getElementById('claim-box').style.display = 'block';
-    document.getElementById('wonText').innerText = "Verifying..."; 
+    document.getElementById('wonText').innerText = "Verifying Reward..."; // Placeholder
 
     try {
-        // 3. Fetch Prize from Google
+        // C. Fetch Data from your Server Config
         const res = await fetch(config.sheet);
-        const text = await res.json(); // Ensure your server sends JSON or text correctly
+        const csvData = await res.text();
         
-        // ... (Your existing prize selection logic) ...
+        // D. Weighted Prize Logic
+        const lines = csvData.split('\n').slice(1);
+        const gifts = lines.map(line => {
+            const parts = line.split(',');
+            return { name: parts[0].trim(), weight: parseInt(parts[1]) || 1 };
+        });
 
-        // 4. Update UI with the actual prize
-        document.getElementById('wonText').innerText = prize;
-        document.getElementById('idBadge').innerText = `ID: ${code}`;
+        let totalWeight = gifts.reduce((sum, g) => sum + g.weight, 0);
+        let random = Math.random() * totalWeight;
+        let selected = gifts[0].name;
 
-        // 5. Success Confetti
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        for (let g of gifts) {
+            if (random < g.weight) {
+                selected = g.name;
+                break;
+            }
+            random -= g.weight;
+        }
 
-    } catch (error) {
-        console.error("Reveal Error:", error);
-        document.getElementById('wonText').innerText = "Network Error - Try Again";
+        const winID = `IPX-${Math.floor(1000 + Math.random() * 9000)}`;
+
+        // E. Update UI with the real Prize
+        document.getElementById('wonText').innerText = selected;
+        document.getElementById('idBadge').innerText = `ID: ${winID}`;
+
+        // F. Final Celebration
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#D4AF37', '#FFFFFF', '#C0C0C0']
+        });
+
+        // G. Sync back to Server/Google Sheets
+        fetch('/api/save-win', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: userPhone, prize: selected, code: winID })
+        });
+
+    } catch (err) {
+        console.error("Reveal Error:", err);
+        document.getElementById('wonText').innerText = "Connection Error - Please show staff";
     }
 }
-
 function downloadPrize() {
     html2canvas(document.querySelector("#capture-area")).then(c => {
         const a = document.createElement('a'); a.download = 'iPromax-Winner.png'; a.href = c.toDataURL(); a.click();
