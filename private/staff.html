@@ -117,7 +117,7 @@
 
 <script>
     // --- CONFIGURATION ---
-    const scriptURL = "https://script.google.com/macros/s/AKfycbx667zmUVstRYpuuU6hE1M6hJgcaXnqNUk7cSGO2AA6HtptcHjoWnRlbAlBK1RQTdP8/exec"; 
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyoF5vN1zS-ZWf0sWwaIMhwfzsUYSSx1xSRAygJyKQAEwbGfu6ObOWGwVcgs86uaoZ8/exec"; 
 
     window.onload = function() {
         if(scriptURL.includes("PASTE_YOUR")) {
@@ -196,26 +196,50 @@
     }
 
     // --- LOGIC: PRIZE MANAGEMENT ---
-    async function loadPrizes() {
-        try {
-            const res = await fetch(`${scriptURL}?action=getPrizes`, { redirect: 'follow' });
-            const prizes = await res.json();
-            const container = document.getElementById('prize-list');
-            
-            if (!Array.isArray(prizes)) {
-                container.innerHTML = `<p style="color:#888">Add a 'Prizes' tab to your sheet.</p>`;
-                return;
-            }
-            
-            container.innerHTML = prizes.map((p, i) => `
-                <div class="prize-row" style="display:flex; gap:10px; margin-bottom:10px;">
-                    <input type="text" value="${p.name}" class="p-name" style="flex:2; padding:10px; background:#000; border:1px solid #333; color:#fff; border-radius:8px;">
-                    <input type="number" value="${p.weight}" class="p-weight" style="flex:1; padding:10px; background:#000; border:1px solid #333; color:var(--gold); border-radius:8px;">
-                </div>
-            `).join('');
-        } catch (err) { console.error("Prizes Error:", err); }
-    }
+   async function loadPrizes() {
+    const container = document.getElementById('prize-list');
+    try {
+        const res = await fetch(`${scriptURL}?action=getPrizes`, { 
+            method: 'GET',
+            redirect: 'follow' 
+        });
+        
+        const prizes = await res.json();
+        
+        // If the sheet is empty or tab is missing
+        if (!Array.isArray(prizes) || prizes.length === 0) {
+            container.innerHTML = `
+                <div style="padding:15px; border:1px dashed #444; color:#888; text-align:center;">
+                    No prizes found in 'Prizes' tab. <br>
+                    <button class="btn btn-outline" style="margin-top:10px;" onclick="addNewPrizeRow()">+ Add First Prize</button>
+                </div>`;
+            return;
+        }
+        
+        container.innerHTML = prizes.map((p, i) => `
+            <div class="prize-row" style="display:flex; gap:10px; margin-bottom:10px;">
+                <input type="text" value="${p.name}" class="p-name" style="flex:2; padding:10px; background:#000; border:1px solid #333; color:#fff; border-radius:8px;">
+                <input type="number" value="${p.weight}" class="p-weight" style="flex:1; padding:10px; background:#000; border:1px solid #333; color:var(--gold); border-radius:8px;">
+            </div>
+        `).join('') + `<button class="btn btn-outline" style="width:100%; font-size:0.7rem;" onclick="addNewPrizeRow()">+ Add Row</button>`;
 
+    } catch (err) {
+        container.innerHTML = `<p style="color:var(--red)">Connection Error. Check your scriptURL.</p>`;
+    }
+}
+
+// Add this helper function to your script
+function addNewPrizeRow() {
+    const container = document.getElementById('prize-list');
+    const newRow = document.createElement('div');
+    newRow.className = "prize-row";
+    newRow.style = "display:flex; gap:10px; margin-bottom:10px;";
+    newRow.innerHTML = `
+        <input type="text" class="p-name" style="flex:2; padding:10px; background:#000; border:1px solid #333; color:#fff; border-radius:8px;" placeholder="New Prize">
+        <input type="number" class="p-weight" style="flex:1; padding:10px; background:#000; border:1px solid #333; color:var(--gold); border-radius:8px;" value="1">
+    `;
+    container.insertBefore(newRow, container.lastChild);
+}
     async function savePrizes() {
         const names = document.querySelectorAll('.p-name');
         const weights = document.querySelectorAll('.p-weight');
