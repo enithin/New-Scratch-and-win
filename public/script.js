@@ -160,7 +160,7 @@ function checkProgress(ctx) {
     const percentScratched = transparentCount / (320 * 320);
 
     // 4. TRIGGER: If more than 20% is cleared, reveal the prize
-    if (percentScratched > 0.20 && !isDone) {
+    if (percentScratched > 0.50 && !isDone) {
         finalize();
     }
 }
