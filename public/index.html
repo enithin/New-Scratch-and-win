@@ -76,13 +76,18 @@
         }
 
         /* Result Reveal Area */
-     #capture-area {
-    background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
-    padding: 40px 20px;
-    border-radius: 25px;
-    border: 3px solid #D4AF37;
-    position: relative; /* REQUIRED for the ribbon to stay inside */
+    #capture-area {
+    position: relative; /* CRITICAL: Tells the ribbon to align to THIS box */
+    overflow: hidden;    /* CRITICAL: Cuts off anything that sticks out */
     
+    /* Your existing styles */
+    background: #000;
+    border: 3px solid #D4AF37;
+    border-radius: 20px;
+    padding: 30px;
+    width: 320px;
+    margin: 0 auto;
+}
     /* THE FIX: Clips the ribbon so it doesn't stick out */
     overflow: hidden; 
     
@@ -128,18 +133,19 @@
     content: 'OFFICIAL REWARD';
     position: absolute;
     
-    /* Adjust these numbers to slide the ribbon */
+    /* Adjust these to move it inside */
     top: 15px;      
-    right: -30px;   
+    right: -30px;   /* Negative value is fine because overflow:hidden clips it */
     
+    transform: rotate(45deg);
     background: #D4AF37;
     color: #000;
-    font-size: 0.6rem;
-    font-weight: 800;
-    padding: 5px 35px;
-    transform: rotate(45deg);
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 5px 40px;
     z-index: 10;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-transform: uppercase;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 .vibrant-prize {
