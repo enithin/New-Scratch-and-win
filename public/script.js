@@ -232,8 +232,8 @@ async function finalize() {
 // THIS MUST BE OUTSIDE THE FINALIZE FUNCTION (AT THE BOTTOM OF THE FILE)
 async function saveWinToGoogle(winData) {
     // PASTE YOUR GOOGLE APPS SCRIPT /EXEC URL HERE
-    const scriptURL = "https://script.google.com/macros/s/AKfycby57X7Cr5aL_Ll--moomsHu4enoTCwKKptUIW-SG6fK2Spvdm5QWo18BO1eIXqMyvPl/exec";
-
+    const scriptURL = "https://script.google.com/macros/s/AKfycby2Gswipg7U1Y3kkbzvfyYPTwUwPX0CW6W74226J1_JpwAGdVRSiEs-Qu28A4sIk5A/exec";
+c
     try {
         await fetch(scriptURL, {
             method: 'POST',
