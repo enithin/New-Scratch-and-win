@@ -98,20 +98,24 @@
 
     /* Update your prize text style */
 #wonText {
-    font-size: 2.2rem; /* Reduced from 2.5rem */
+    /* REMOVE the background-color or linear-gradient lines */
+    background: transparent !important; 
+    
+    /* Ensure the text is still visible and bold */
+    color: #D4AF37; /* Keeping the text Gold for that premium look */
+    font-size: 2.2rem;
     font-weight: 900;
-    color: #D4AF37;
-    margin: 10px 0;
     text-transform: uppercase;
     
-    /* THE FIX: Padding and constraints */
-    padding: 10px 20px; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 120px; /* Ensures the box has a consistent height */
-    word-break: break-word; /* Wraps text if it's too long */
-    line-height: 1;
+    /* Add a subtle border or glow if it feels too empty */
+    border: 1px solid rgba(212, 175, 55, 0.3); 
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    margin: 15px auto;
+    
+    display: block;
+    text-align: center;
 }
 
 /* Specific fix for the white/gold gradient box background */
@@ -127,25 +131,6 @@
     #wonText {
         font-size: 1.6rem; 
     }
-}
-/* Add a diagonal "Premium" stripe in the corner */
-#capture-area::before {
-    content: 'OFFICIAL REWARD';
-    position: absolute;
-    
-    /* Adjust these to move it inside */
-    top: 15px;      
-    right: -30px;   /* Negative value is fine because overflow:hidden clips it */
-    
-    transform: rotate(45deg);
-    background: #D4AF37;
-    color: #000;
-    font-size: 0.65rem;
-    font-weight: 900;
-    padding: 5px 40px;
-    z-index: 10;
-    text-transform: uppercase;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 .vibrant-prize {
