@@ -231,24 +231,27 @@ async function finalize() {
 
 // THIS MUST BE OUTSIDE THE FINALIZE FUNCTION (AT THE BOTTOM OF THE FILE)
 async function saveWinToGoogle(winData) {
-    const scriptURL = "https://script.google.com/macros/s/AKfycbyoF5vN1zS-ZWf0sWwaIMhwfzsUYSSx1xSRAygJyKQAEwbGfu6ObOWGwVcgs86uaoZ8/exec"; // <--- DOUBLE CHECK THIS
+    // 1. Ensure your URL is correct here
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyoF5vN1zS-ZWf0sWwaIMhwfzsUYSSx1xSRAygJyKQAEwbGfu6ObOWGwVcgs86uaoZ8/exec"; 
 
     try {
-        // We use 'fetch' with a POST request
+        console.log("Attempting to save win data...", winData);
+        
+        // The Fetch Call
         await fetch(scriptURL, {
             method: 'POST',
-            mode: 'no-cors', // Essential for Google Apps Script POST
+            mode: 'no-cors', 
             cache: 'no-cache',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(winData)
         });
-        console.log("Win data sent to Google Sheets successfully.");
+
+        console.log("Data sent to Google Sheets.");
     } catch (err) {
-        console.error("Failed to save win:", err);
-        // Fallback: If it fails, try a simple GET request as a backup
-        fetch(`${scriptURL}?action=backupSave&phone=${winData.phone}&prize=${winData.prize}&code=${winData.code}`);
+        // Fix: Use 'err' or 'error', not 'c'
+        console.error("Save failed:", err);
     }
 }
 
