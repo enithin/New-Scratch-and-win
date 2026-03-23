@@ -217,7 +217,7 @@ async function finalize() {
         };
         
         // Call the helper function below
-        saveWinToGoogle(winData);
+       await saveWinToGoogle(winData);
 
         // 6. Effects
         if (winSfx) winSfx.play().catch(() => {});
@@ -231,20 +231,24 @@ async function finalize() {
 
 // THIS MUST BE OUTSIDE THE FINALIZE FUNCTION (AT THE BOTTOM OF THE FILE)
 async function saveWinToGoogle(winData) {
-    // PASTE YOUR GOOGLE APPS SCRIPT /EXEC URL HERE
-    const scriptURL = "https://script.google.com/macros/s/AKfycbyoF5vN1zS-ZWf0sWwaIMhwfzsUYSSx1xSRAygJyKQAEwbGfu6ObOWGwVcgs86uaoZ8/exec";
-c
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyoF5vN1zS-ZWf0sWwaIMhwfzsUYSSx1xSRAygJyKQAEwbGfu6ObOWGwVcgs86uaoZ8/exec"; // <--- DOUBLE CHECK THIS
+
     try {
+        // We use 'fetch' with a POST request
         await fetch(scriptURL, {
             method: 'POST',
-            mode: 'no-cors', // Critical for Google Apps Script
+            mode: 'no-cors', // Essential for Google Apps Script POST
             cache: 'no-cache',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify(winData)
         });
-        console.log("✅ Sheet Sync Successful");
+        console.log("Win data sent to Google Sheets successfully.");
     } catch (err) {
-        console.log("❌ Sheet Sync Failed", err);
+        console.error("Failed to save win:", err);
+        // Fallback: If it fails, try a simple GET request as a backup
+        fetch(`${scriptURL}?action=backupSave&phone=${winData.phone}&prize=${winData.prize}&code=${winData.code}`);
     }
 }
 
