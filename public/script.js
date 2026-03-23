@@ -208,6 +208,16 @@ async function finalize() {
         // 4. Update UI
         document.getElementById('wonText').innerText = winner;
         document.getElementById('idBadge').innerText = `ID: ${winID}`;
+
+        const wonText = document.getElementById('wonText');
+wonText.innerText = winner;
+
+// Auto-shrink logic
+if (winner.length > 12) {
+    wonText.style.fontSize = "1.8rem";
+} else if (winner.length > 18) {
+    wonText.style.fontSize = "1.4rem";
+}
         
         // 5. DATA SYNC (The part that was failing)
         const winData = {
